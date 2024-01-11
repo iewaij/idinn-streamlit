@@ -1,5 +1,5 @@
 ---
-title: 'IDINNs: A Python package for c'
+title: 'IDINNs: A Python package for inventory-dynamics control with neural networks'
 tags:
   - Python
   - artificial neural networks
