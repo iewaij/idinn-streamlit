@@ -35,15 +35,9 @@ bibliography: paper.bib
 
 # Summary
 
-The forces on stars, galaxies, and dark matter under external gravitational
-fields lead to the dynamical evolution of structures in the universe. The orbits
-of these bodies are therefore key to understanding the formation, history, and
-future state of galaxies. The field of "galactic dynamics," which aims to model
-the gravitating components of galaxies to study their structure and evolution,
-is now well-established, commonly taught, and frequently used in astronomy.
-Aside from toy problems and demonstrations, the majority of problems require
-efficient numerical tools, many of which require the same base code (e.g., for
-performing numerical orbit integration).
+A significant challenge in inventory management involves identifying optimal policies for replenishing inventory from multiple suppliers. To address such optimization problems, one must determine the quantities to order from each supplier based on the net inventory and outstanding orders, aiming to jointly minimize expected backlogging, holding, and sourcing costs. Despite over 60 years of extensive study on inventory management problems, even fundamental dual-sourcing problems—where orders from an expensive supplier arrive faster than orders from a regular supplier—remain inherently complex in their general form. Moreover, there is a growing need to develop proactive and scalable optimization algorithms capable of adjusting recommendations to dynamic shifts in demand in a timely manner.
+
+"IDINN" is a Python package that offers implementations of inventory dynamics informed neural networks designed for controlling dual-sourcing problems. Additionally, we provide a dynamic program implementation for computing the optimal solution to dual-sourcing problems. The package includes neural network architecture data and dynamic program outputs for 72 dual-sourcing instances, serving as a valuable testbed for evaluating inventory-dynamics optimization algorithms.
 
 # Statement of need
 
