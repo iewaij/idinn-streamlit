@@ -1,34 +1,34 @@
 ---
-title: 'Gala: A Python package for galactic dynamics'
+title: 'IDINNs: A Python package for c'
 tags:
   - Python
-  - astronomy
-  - dynamics
-  - galactic dynamics
-  - milky way
+  - artificial neural networks
+  - inventory dynamics
+  - optimization
+  - control
+  - dynamic programming
 authors:
-  - name: Adrian M. Price-Whelan
-    orcid: 0000-0000-0000-0000
-    equal-contrib: true
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
-  - name: Author Without ORCID
-    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
+  - name: Jiawei Li
+    affiliation: 1
+    corresponding: true
+  - name: Thomas Asikis
+    orcid: 0000-0003-0163-4622
     affiliation: 2
-  - name: Author with no affiliation
-    corresponding: true # (This is how to denote the corresponding author)
+  - name: Ioannis Fragkos
     affiliation: 3
-  - given-names: Ludwig
-    dropping-particle: van
-    surname: Beethoven
-    affiliation: 3
+  - name: Lucas B\"ottcher
+    affiliation: "1,4"
+    orcid: 0000-0003-1700-1897
 affiliations:
- - name: Lyman Spitzer, Jr. Fellow, Princeton University, USA
+ - name: Department of Computational Science and Philosophy, Frankfurt School of Finance and Management
    index: 1
- - name: Institution Name, Country
+ - name: Game Theory, University of Zurich
    index: 2
- - name: Independent Researcher, Country
+ - name: Department of Technology and Operations Management, Rotterdam School of Management, Erasmus University Rotterdam
    index: 3
-date: 13 August 2017
+ - name: Laboratory for Systems Medicine, Department of Medicine, University of Florida
+   index: 4
+date: 16 January 2024
 bibliography: paper.bib
 
 # Optional fields if submitting to a AAS journal too, see this blog post:
@@ -71,7 +71,7 @@ design, and support for Astropy functionality in `Gala` will enable exciting
 scientific explorations of forthcoming data releases from the *Gaia* mission
 [@gaia] by students and experts alike.
 
-# Mathematics
+# Brief software description
 
 Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
 
