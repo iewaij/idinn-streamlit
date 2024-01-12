@@ -37,7 +37,7 @@ bibliography: paper.bib
 
 Identifying optimal policies for replenishing inventory from multiple suppliers is a key problem in inventory management. Solving such optimization problems means that one must determine the quantities to order from each supplier based on the current net inventory and outstanding orders, minimizing the expected backlogging, holding, and sourcing costs. Despite over 60 years of extensive study on inventory management problems, even fundamental dual-sourcing problems—where orders from an expensive supplier arrive faster than orders from a regular supplier—remain analytically intractable. Additionally, there is a growing need for optimization algorithms that are capable of handling real-world inventory problems with large numbers of suppliers and non-stationary demand.
 
-We provide a Python package, ``IDINN``, implementing inventory dynamics–informed neural networks designed for controlling dual-sourcing problems. We also provide an implementation of a dynamic program that computes the optimal solution to dual-sourcing problems. The package includes neural-network architecture data and dynamic-program outputs for 72 dual-sourcing instances, serving as a valuable testbed for evaluating dual-sourcing optimization algorithms.
+We provide a Python package, `IDINN`, implementing inventory dynamics–informed neural networks designed for controlling dual-sourcing problems. We also provide an implementation of a dynamic program that computes the optimal solution to dual-sourcing problems. The package includes neural-network architecture data and dynamic-program outputs for 72 dual-sourcing instances, serving as a valuable testbed for evaluating dual-sourcing optimization algorithms.
 
 # Statement of need
 
@@ -52,14 +52,12 @@ interfaces well with the implementations of physical units and astronomical
 coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
 `astropy.coordinates`).
 
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
+`IDINN` has been developed for researchers and students working at the intersection 
+of optimization, operations research, and machine learning. It has been made available 
+to students in a machine learning course at Frankfurt School to demonstrate 
+the effective application of artificial neural networks in solving real-world optimization problems.
+In a previous publication [@bottcher2023control], a less accessible code base was used to
+compute near-optimal solutions of dozens of dual-sourcing instances. 
 
 # Brief software description
 
