@@ -40,21 +40,38 @@ problem in inventory management. Solving such optimization problems means that o
 determine the quantities to order from each supplier based on the current net inventory 
 and outstanding orders, minimizing the expected backlogging, holding, and sourcing costs. 
 Despite over 60 years of extensive study on inventory management problems, even fundamental 
-dual-sourcing problems—where orders from an expensive supplier arrive faster than orders 
-from a regular supplier—remain analytically intractable. Additionally, there is a growing 
-need for optimization algorithms that are capable of handling real-world inventory 
-problems with large numbers of suppliers and non-stationary demand.
+dual-sourcing problems [@barankin1961delivery,fukuda1964optimal]—where orders from an 
+expensive supplier arrive faster than orders from a regular supplier—remain analytically 
+intractable. Additionally, there is a growing interest in optimization algorithms that 
+are capable of handling real-world inventory problems with large numbers of 
+suppliers and non-stationary demand.
 
 We provide a Python package, `IDINN`, implementing inventory dynamics–informed neural 
-networks designed for controlling dual-sourcing problems. We also provide an implementation 
-of a dynamic program that computes the optimal solution to dual-sourcing problems. 
+networks designed for controlling both single-sourcing and dual-sourcing problems. 
+Neural network controllers and inventory dynamics are implemented in two easily customizable 
+classes, enabling users to control extensions of the provided inventory management 
+systems by tailoring the implementations to their needs. `IDINN` also encompasses 
+a dynamic program that computes the optimal solution to dual-sourcing problems. 
 The package includes neural-network architecture data and dynamic-program outputs 
-for 72 dual-sourcing instances, serving as a valuable testbed for evaluating dual-sourcing 
-optimization algorithms.
+for 72 dual-sourcing instances, serving as a valuable testbed for evaluating 
+dual-sourcing optimization algorithms.
 
 # Statement of need
 
-`Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
+Inventory management problems commonly arise in many real-world situations, encompassing
+retail, manufacturing, and logistics. A basic and yet analytically intractable problem
+in inventory management is dual sourcing [@barankin1961delivery,fukuda1964optimal]. 
+`IDINN` is a Python package for controlling dual-sourcing inventory dynamics with 
+dynamics-informed neural networks. What makes our work stand out from related research 
+is its innovative use of artificial neural networks in solving complex optimization 
+and decision problems. Unlike traditional approaches, our work takes into account 
+how the system being optimized behaves over time, leading to more accurate and 
+efficient solutions. The integration of system dynamics allows for a better understanding 
+of the problem and enables the employed neural networks to handle challenging situations 
+that were previously difficult to tackle. Further, the design of the networks leverage 
+existing knowledge for the structure of the optimal solutions of simple, single-sourcing 
+models with backlogging. Overall, our paper demonstrates the power of neural 
+networks in effectively solving complex decision problems.
 enables wrapping low-level languages (e.g., C) for speed without losing
 flexibility or ease-of-use in the user-interface. The API for `Gala` was
 designed to provide a class-based and user-friendly interface to fast (C or
@@ -64,6 +81,7 @@ and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
 interfaces well with the implementations of physical units and astronomical
 coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
 `astropy.coordinates`).
+
 
 `IDINN` has been developed for researchers and students working at the intersection 
 of optimization, operations research, and machine learning. It has been made available 
