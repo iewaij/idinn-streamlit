@@ -40,7 +40,7 @@ problem in inventory management. Solving such optimization problems means that o
 determine the quantities to order from each supplier based on the current net inventory 
 and outstanding orders, minimizing the expected backlogging, holding, and sourcing costs. 
 Despite over 60 years of extensive research on inventory management problems, even fundamental 
-dual-sourcing problems [@barankin1961delivery,fukuda1964optimal]—where orders from an 
+dual-sourcing problems [@barankin1961delivery,@fukuda1964optimal]—where orders from an 
 expensive supplier arrive faster than orders from a regular supplier—remain analytically 
 intractable. Additionally, there is a growing interest in optimization algorithms that 
 are capable of handling real-world inventory problems with large numbers of 
@@ -60,7 +60,7 @@ dual-sourcing optimization algorithms.
 
 Inventory management problems commonly arise in almost all industries. A basic and 
 yet analytically intractable problem in inventory management is dual sourcing 
-[@barankin1961delivery,fukuda1964optimal]. `IDINN` is a Python package for controlling 
+[@barankin1961delivery,@fukuda1964optimal]. `IDINN` is a Python package for controlling 
 dual-sourcing inventory dynamics with dynamics-informed neural networks. 
 Unlike traditional reinforcement-learning approaches, our optimization approach takes 
 into account how the system being optimized behaves over time, leading to more efficient training 
@@ -71,7 +71,7 @@ a specific challenge. The adjustment of neural network weights during training r
 on propagating real-valued gradients, whereas the neural network outputs—representing 
 replenishment orders—must be integers. To address this challenge in optimizing a 
 discrete problem with real-valued gradient descent learning algorithms, we employ 
-a problem-tailored straight-through estimator [@yang2022,asikis2023multi]. 
+a problem-tailored straight-through estimator [@yang2022,@asikis2023multi]. 
 This approach enables us to obtain integer-valued neural network outputs while 
 backpropagating real-valued gradients.
 
