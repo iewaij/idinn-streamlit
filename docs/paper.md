@@ -35,9 +35,22 @@ bibliography: paper.bib
 
 # Summary
 
-Identifying optimal policies for replenishing inventory from multiple suppliers is a key problem in inventory management. Solving such optimization problems means that one must determine the quantities to order from each supplier based on the current net inventory and outstanding orders, minimizing the expected backlogging, holding, and sourcing costs. Despite over 60 years of extensive study on inventory management problems, even fundamental dual-sourcing problems—where orders from an expensive supplier arrive faster than orders from a regular supplier—remain analytically intractable. Additionally, there is a growing need for optimization algorithms that are capable of handling real-world inventory problems with large numbers of suppliers and non-stationary demand.
+Identifying optimal policies for replenishing inventory from multiple suppliers is a key 
+problem in inventory management. Solving such optimization problems means that one must 
+determine the quantities to order from each supplier based on the current net inventory 
+and outstanding orders, minimizing the expected backlogging, holding, and sourcing costs. 
+Despite over 60 years of extensive study on inventory management problems, even fundamental 
+dual-sourcing problems—where orders from an expensive supplier arrive faster than orders 
+from a regular supplier—remain analytically intractable. Additionally, there is a growing 
+need for optimization algorithms that are capable of handling real-world inventory 
+problems with large numbers of suppliers and non-stationary demand.
 
-We provide a Python package, `IDINN`, implementing inventory dynamics–informed neural networks designed for controlling dual-sourcing problems. We also provide an implementation of a dynamic program that computes the optimal solution to dual-sourcing problems. The package includes neural-network architecture data and dynamic-program outputs for 72 dual-sourcing instances, serving as a valuable testbed for evaluating dual-sourcing optimization algorithms.
+We provide a Python package, `IDINN`, implementing inventory dynamics–informed neural 
+networks designed for controlling dual-sourcing problems. We also provide an implementation 
+of a dynamic program that computes the optimal solution to dual-sourcing problems. 
+The package includes neural-network architecture data and dynamic-program outputs 
+for 72 dual-sourcing instances, serving as a valuable testbed for evaluating dual-sourcing 
+optimization algorithms.
 
 # Statement of need
 
