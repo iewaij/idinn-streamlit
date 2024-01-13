@@ -39,7 +39,7 @@ Identifying optimal policies for replenishing inventory from multiple suppliers 
 problem in inventory management. Solving such optimization problems means that one must 
 determine the quantities to order from each supplier based on the current net inventory 
 and outstanding orders, minimizing the expected backlogging, holding, and sourcing costs. 
-Despite over 60 years of extensive study on inventory management problems, even fundamental 
+Despite over 60 years of extensive research on inventory management problems, even fundamental 
 dual-sourcing problems [@barankin1961delivery,fukuda1964optimal]—where orders from an 
 expensive supplier arrive faster than orders from a regular supplier—remain analytically 
 intractable. Additionally, there is a growing interest in optimization algorithms that 
@@ -58,35 +58,25 @@ dual-sourcing optimization algorithms.
 
 # Statement of need
 
-Inventory management problems commonly arise in many real-world situations, encompassing
-retail, manufacturing, and logistics. A basic and yet analytically intractable problem
-in inventory management is dual sourcing [@barankin1961delivery,fukuda1964optimal]. 
-`IDINN` is a Python package for controlling dual-sourcing inventory dynamics with 
-dynamics-informed neural networks. What makes our work stand out from related research 
-is its innovative use of artificial neural networks in solving complex optimization 
-and decision problems. Unlike traditional approaches, our work takes into account 
-how the system being optimized behaves over time, leading to more accurate and 
-efficient solutions. The integration of system dynamics allows for a better understanding 
-of the problem and enables the employed neural networks to handle challenging situations 
-that were previously difficult to tackle. Further, the design of the networks leverage 
-existing knowledge for the structure of the optimal solutions of simple, single-sourcing 
-models with backlogging. Overall, our paper demonstrates the power of neural 
-networks in effectively solving complex decision problems.
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
-
+Inventory management problems commonly arise in almost all industries. A basic and 
+yet analytically intractable problem in inventory management is dual sourcing 
+[@barankin1961delivery,fukuda1964optimal]. `IDINN` is a Python package for controlling 
+dual-sourcing inventory dynamics with dynamics-informed neural networks. 
+Unlike traditional reinforcement-learning approaches, our optimization approach takes 
+into account how the system being optimized behaves over time, leading to more efficient training 
+and accurate solutions. Training neural networks for inventory-dynamics control presents 
+a specific challenge. The adjustment of neural network weights during training relies 
+on propagating real-valued gradients, whereas the neural network outputs—representing 
+replenishment orders—must be integers. To address this challenge in optimizing a 
+discrete problem with real-valued gradient descent learning algorithms, we employ 
+a problem-tailored straight-through estimator [@yang2022,asikis2023multi]. 
+This approach enables us to obtain integer-valued neural network outputs while 
+backpropagating real-valued gradients.
 
 `IDINN` has been developed for researchers and students working at the intersection 
 of optimization, operations research, and machine learning. It has been made available 
 to students in a machine learning course at Frankfurt School to demonstrate 
-the effective application of artificial neural networks in solving real-world optimization problems.
+the effectiveness of artificial neural networks in solving real-world optimization problems.
 In a previous publication [@bottcher2023control], a less accessible code base was used to
 compute near-optimal solutions of dozens of dual-sourcing instances. 
 
