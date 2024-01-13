@@ -71,7 +71,7 @@ a specific challenge. The adjustment of neural network weights during training r
 on propagating real-valued gradients, whereas the neural network outputs—representing 
 replenishment orders—must be integers. To address this challenge in optimizing a 
 discrete problem with real-valued gradient descent learning algorithms, we employ 
-a problem-tailored straight-through estimator [@yang2022,@asikis2023multi]. 
+a problem-tailored straight-through estimator [@yang2022injecting,@asikis2023multi]. 
 This approach enables us to obtain integer-valued neural network outputs while 
 backpropagating real-valued gradients.
 
