@@ -64,7 +64,9 @@ yet analytically intractable problem in inventory management is dual sourcing
 dual-sourcing inventory dynamics with dynamics-informed neural networks. 
 Unlike traditional reinforcement-learning approaches, our optimization approach takes 
 into account how the system being optimized behaves over time, leading to more efficient training 
-and accurate solutions. Training neural networks for inventory-dynamics control presents 
+and accurate solutions. 
+
+Training neural networks for inventory-dynamics control presents 
 a specific challenge. The adjustment of neural network weights during training relies 
 on propagating real-valued gradients, whereas the neural network outputs—representing 
 replenishment orders—must be integers. To address this challenge in optimizing a 
