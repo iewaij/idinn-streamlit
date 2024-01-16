@@ -252,8 +252,6 @@ class DualFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixIn)
         lr_init_inventory=1e-1,
         lr_parameters=3e-3,
         seed=None,
-        save=False,
-        save_path=None,
         tensorboard_writer=None,
     ):
         if seed is not None:
