@@ -359,12 +359,20 @@ class DualFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixIn)
 class CappedDualIndexController:
     def __init__(self, s_e=0, s_r=0, q_r=0):
         """
-        Parameters:
-        s_e (int): Capped dual index parameter 1
-        s_r (int): Capped dual index parameter 2
-        q_r (int): Capped dual index parameter 3
+        Parameters
+        ----------
+        s_e: int
+            Capped dual index parameter 1
+        s_r: int
+            Capped dual index parameter 2
+        q_r: int
+            Capped dual index parameter 3
 
-        Reference: Robust dual sourcing inventory management: Optimality of capped dual index policies and smoothing.
+        Notes
+        -----
+        The function follows the implemetation of Sun, J., & Van Mieghem, J. A. (2019)([1]_).
+
+        .. [1] Robust dual sourcing inventory management: Optimality of capped dual index policies and smoothing.
         Manufacturing & Service Operations Management, 21(4), 912-931.
         """
         self.s_e = s_e
@@ -381,7 +389,9 @@ class CappedDualIndexController:
         k,
     ):
         """
-        Implementation of Eq. (3) of Sun, J., & Van Mieghem, J. A. (2019).
+        Implementation of Eq. (3) of Sun, J., & Van Mieghem, J. A. (2019)([1]_).
+
+        
         """
         inventory_position = current_inventory + sum(
             past_regular_orders[-regular_lead_time + i] for i in range(k + 1)

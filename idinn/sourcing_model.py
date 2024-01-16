@@ -43,6 +43,23 @@ class SingleSourcingModel(BaseSourcingModel):
         batch_size=1,
         demand_generator=torch.distributions.Uniform(low=0, high=5),
     ):
+        """
+        Parameters
+        ----------
+        lead_time : float
+            The lead time for orders.
+        holding_cost : float
+            The cost of holding inventory.
+        shortage_cost : float
+            The cost of inventory shortage.
+        init_inventory : float
+            The initial inventory.
+        batch_size : int, optional
+            The batch size for orders. Default is 1.
+        demand_generator : torch.distributions.Distribution, optional
+            The demand generator for generating demand values. Default is a uniform distribution
+            with low=0 and high=5, which is equivalent to torch.randint(0, 4).
+        """
         super().__init__(
             holding_cost, shortage_cost, init_inventory, batch_size, demand_generator
         )
@@ -96,6 +113,29 @@ class DualSourcingModel(BaseSourcingModel):
         batch_size=1,
         demand_generator=torch.distributions.Uniform(low=0, high=5),
     ):
+        """
+        Parameters
+        ----------
+        regular_lead_time : float
+            The lead time for regular orders.
+        expedited_lead_time : float
+            The lead time for expedited orders.
+        regular_order_cost : float
+            The cost of placing a regular order.
+        expedited_order_cost : float
+            The cost of placing an expedited order.
+        holding_cost : float
+            The cost of holding inventory.
+        shortage_cost : float
+            The cost of shortage.
+        init_inventory : float
+            The initial inventory.
+        batch_size : int, optional
+            The batch size for orders. Default is 1.
+        demand_generator : torch.distributions.Distribution, optional
+            The demand generator for generating demand values. Default is a uniform distribution
+            with low=0 and high=5 which is equivalent to torch.randint(0, 4).
+        """
         super().__init__(
             holding_cost, shortage_cost, init_inventory, batch_size, demand_generator
         )
