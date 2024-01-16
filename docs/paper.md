@@ -1,5 +1,5 @@
 ---
-title: 'IDINN: A Python package for inventory-dynamics control with neural networks'
+title: 'idinn: A Python Package for Inventory-Dynamics Control with Neural Networks'
 tags:
   - Python
   - artificial neural networks
@@ -46,11 +46,11 @@ intractable. Additionally, there is a growing interest in optimization algorithm
 are capable of handling real-world inventory problems with large numbers of 
 suppliers and non-stationary demand.
 
-We provide a Python package, `IDINN`, implementing inventory dynamics–informed neural 
+We provide a Python package, `idinn`, implementing inventory dynamics–informed neural 
 networks designed for controlling both single-sourcing and dual-sourcing problems. 
 Neural network controllers and inventory dynamics are implemented in two easily customizable 
 classes, enabling users to control extensions of the provided inventory management 
-systems by tailoring the implementations to their needs. `IDINN` also encompasses 
+systems by tailoring the implementations to their needs. `idinn` also encompasses 
 a dynamic program that computes the optimal solution to dual-sourcing problems. 
 The package includes neural-network architecture data and dynamic-program outputs 
 for 72 dual-sourcing instances, serving as a valuable testbed for evaluating 
@@ -60,7 +60,7 @@ dual-sourcing optimization algorithms.
 
 Inventory management problems commonly arise in almost all industries. A basic and 
 yet analytically intractable problem in inventory management is dual sourcing 
-[@barankin1961delivery,@fukuda1964optimal]. `IDINN` is a Python package for controlling 
+[@barankin1961delivery,@fukuda1964optimal]. `idinn` is a Python package for controlling 
 dual-sourcing inventory dynamics with dynamics-informed neural networks. 
 Unlike traditional reinforcement-learning approaches, our optimization approach takes 
 into account how the system being optimized behaves over time, leading to more efficient training 
@@ -75,7 +75,7 @@ a problem-tailored straight-through estimator [@yang2022injecting,@asikis2023mul
 This approach enables us to obtain integer-valued neural network outputs while 
 backpropagating real-valued gradients.
 
-`IDINN` has been developed for researchers and students working at the intersection 
+`idinn` has been developed for researchers and students working at the intersection 
 of optimization, operations research, and machine learning. It has been made available 
 to students in a machine learning course at Frankfurt School to demonstrate 
 the effectiveness of artificial neural networks in solving real-world optimization problems.
