@@ -14,6 +14,7 @@ The package can be installed and edited locally by running
 git clone https://gitlab.com/ComputationalScience/inventory-optimization.git
 cd inventory-optimization
 python -m pip install -e .
+```
 
 Or, if you want to install the latest version without editing the source code, run
 
