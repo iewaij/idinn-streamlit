@@ -2,12 +2,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-class NeuralControllerMixIn():
+
+class NeuralControllerMixIn:
     def save(self, checkpoint_path):
         torch.save(self.state_dict(), checkpoint_path)
-    
+
     def resume(self, checkpoint_path):
         self.load_state_dict(torch.load(checkpoint_path))
+
 
 class SingleFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixIn):
     def __init__(self, hidden_layers=[2], activation=torch.nn.CELU(alpha=1)):
@@ -119,7 +121,7 @@ class SingleFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixI
                         epoch,
                     )
                 tensorboard_writer.flush()
-        
+
         self.load_state_dict(best_state)
 
     def simulate(self, sourcing_model, sourcing_periods, seed=None):
@@ -282,8 +284,8 @@ class DualFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixIn)
             # Save the best model
             if validation_sourcing_periods is not None and epoch % 10 == 0:
                 eval_cost = self.get_total_cost(
-                        sourcing_model, validation_sourcing_periods
-                    )
+                    sourcing_model, validation_sourcing_periods
+                )
                 if eval_cost < min_cost:
                     min_cost = eval_cost
                     best_state = self.state_dict()
@@ -305,7 +307,6 @@ class DualFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixIn)
                 tensorboard_writer.flush()
 
         self.load_state_dict(best_state)
-            
 
     def simulate(self, sourcing_model, sourcing_periods, seed=None):
         if seed is not None:
