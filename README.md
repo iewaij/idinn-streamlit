@@ -6,7 +6,7 @@ Neural network controllers and inventory dynamics are implemented in two easily 
 classes, enabling users to control extensions of the provided inventory management 
 systems by tailoring the implementations to their needs.
 
-## Install
+## Installation
 
 The package can be installed and edited locally by running
 
@@ -91,3 +91,16 @@ dual_sourcing_model = DualSourcingModel(
 controller.train(sourcing_model=dual_sourcing_model, sourcing_periods=100)
 controller.plot(sourcing_model=dual_sourcing_model, sourcing_periods=100)
 ```
+
+## Papers using ``idinn``
+
+We will add papers that use ``ìdinn`` to this list as they appear online.
+
+* Böttcher, Lucas, Thomas Asikis, and Ioannis Fragkos. "Control of Dual-Sourcing Inventory Systems Using Recurrent Neural Networks." [INFORMS Journal on Computing](https://pubsonline.informs.org/doi/abs/10.1287/ijoc.2022.0136) 35.6 (2023): 1308-1328.
+
+## Contributors
+
+* [Jiawei Li](https://gitlab.com/iewaij)
+* [Thomas Asikis](https://gitlab.com/asikist)
+* [Ioannis Fragkos](https://gitlab.com/ioannis.fragkos1)
+* [Lucas Böttcher](https://gitlab.com/lucasboettcher)
