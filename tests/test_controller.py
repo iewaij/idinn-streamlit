@@ -32,7 +32,7 @@ def test_single_controller():
     )
     sourcing_periods = 5
     total_cost = controller.get_total_cost(single_sourcing_model, sourcing_periods, seed=42)
-    assert total_cost.item() == 22
+    assert total_cost.item() == 11.5
 
     # Test simulate method
     past_inventories, past_orders = controller.simulate(single_sourcing_model, sourcing_periods, seed=42)

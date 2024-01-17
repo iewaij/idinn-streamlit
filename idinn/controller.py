@@ -103,8 +103,17 @@ class SingleFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixI
             else:
                 optimizer_parameters.step()
             # Save the best model
-            if total_cost < min_cost:
-                best_state = self.state_dict()
+            if validation_sourcing_periods is not None and epoch % 10 == 0:
+                eval_cost = self.get_total_cost(
+                    sourcing_model, validation_sourcing_periods
+                )
+                if eval_cost < min_cost:
+                    min_cost = eval_cost
+                    best_state = self.state_dict()
+            else:
+                if total_cost < min_cost:
+                    min_cost = total_cost
+                    best_state = self.state_dict()
             # Log train loss
             if tensorboard_writer is not None:
                 tensorboard_writer.add_scalar(
