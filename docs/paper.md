@@ -52,9 +52,6 @@ Neural network controllers and inventory dynamics are implemented in two easily 
 classes, enabling users to control extensions of the provided inventory management 
 systems by tailoring the implementations to their needs. `idinn` also encompasses 
 a dynamic program that computes the optimal solution to dual-sourcing problems. 
-The package includes neural-network architecture data and dynamic-program outputs 
-for 72 dual-sourcing instances, serving as a valuable testbed for evaluating 
-dual-sourcing optimization algorithms.
 
 # Statement of need
 
