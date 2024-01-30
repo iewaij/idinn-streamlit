@@ -9,20 +9,62 @@ class BaseSourcingModel:
         init_inventory,
         batch_size,
         demand_generator=torch.distributions.Uniform(low=0, high=5),
+        lead_time=None,
+        regular_lead_time=None,
+        expedited_lead_time=None,
+        regular_order_cost=None,
+        expedited_order_cost=None,
     ):
         self.holding_cost = holding_cost
         self.shortage_cost = shortage_cost
-        self.batch_size = batch_size
         self.init_inventory = torch.tensor(
             [init_inventory], requires_grad=True, dtype=torch.float
         )
-        self.past_inventories = [self.init_inventory]
+        self.batch_size = batch_size
         self.demand_generator = demand_generator
+        self.lead_time = lead_time
+        self.regular_lead_time = regular_lead_time
+        self.expedited_lead_time = expedited_lead_time
+        self.regular_order_cost = regular_order_cost
+        self.expedited_order_cost = expedited_order_cost
+        self.reset()
+
+    def reset(
+        self,
+        batch_size=None,
+    ):
+        if batch_size is not None and self.batch_size != batch_size:
+            self.batch_size = batch_size
+
+        if self.lead_time is not None:
+            self.past_orders = torch.zeros(self.batch_size, self.lead_time + 1)
+            self.past_inventories = self.get_init_inventory().repeat(
+                self.batch_size, self.lead_time + 1
+            )
+        elif (
+            self.regular_lead_time is not None and self.expedited_lead_time is not None
+        ):
+            if self.regular_lead_time < self.expedited_lead_time:
+                raise ValueError(
+                    "regular_lead_time must be greater than or equal to expedited_lead_time."
+                )
+            self.past_regular_orders = torch.zeros(
+                self.batch_size, self.regular_lead_time + 1
+            )
+            self.past_expedited_orders = torch.zeros(
+                self.batch_size, self.regular_lead_time + 1
+            )
+            self.past_inventories = self.get_init_inventory().repeat(
+                self.batch_size, self.regular_lead_time + 1
+            )
+        else:
+            raise ValueError(
+                "Either lead_time or (regular_lead_time and expedited_lead_time) must be provided."
+            )
 
     def get_init_inventory(self):
         init_inventory = (
-            self.init_inventory.repeat([self.batch_size, 1])
-            - torch.frac(self.init_inventory).clone().detach()
+            self.init_inventory - torch.frac(self.init_inventory).clone().detach()
         )
         return init_inventory
 
@@ -30,7 +72,10 @@ class BaseSourcingModel:
         return self.past_inventories
 
     def get_current_inventory(self):
-        return self.past_inventories[-1]
+        # Keep dim when slicing past_inventories
+        # https://stackoverflow.com/questions/57237352/why-does-torch-slice-lose-dimension
+        # https://discuss.pytorch.org/t/solved-simple-question-about-keep-dim-when-slicing-the-tensor/9280
+        return self.past_inventories[:, [-1]]
 
 
 class SingleSourcingModel(BaseSourcingModel):
@@ -61,18 +106,13 @@ class SingleSourcingModel(BaseSourcingModel):
             with low=0 and high=5, which is equivalent to torch.randint(0, 4).
         """
         super().__init__(
-            holding_cost, shortage_cost, init_inventory, batch_size, demand_generator
+            lead_time=lead_time,
+            holding_cost=holding_cost,
+            shortage_cost=shortage_cost,
+            init_inventory=init_inventory,
+            batch_size=batch_size,
+            demand_generator=demand_generator,
         )
-        self.lead_time = lead_time
-        self.reset()
-
-    def reset(self, batch_size=None):
-        if batch_size is not None and self.batch_size != batch_size:
-            self.batch_size = batch_size
-        self.past_inventories = [self.get_init_inventory()]
-        self.past_orders = [torch.zeros([self.batch_size, 1])]
-        if self.lead_time > 0:
-            self.past_orders = self.past_orders * self.lead_time
 
     def get_lead_time(self):
         return self.lead_time
@@ -82,22 +122,27 @@ class SingleSourcingModel(BaseSourcingModel):
 
     def get_cost(self):
         cost = self.holding_cost * torch.relu(
-            self.past_inventories[-1]
-        ) + self.shortage_cost * torch.relu(-self.past_inventories[-1])
+            self.get_current_inventory()
+        ) + self.shortage_cost * torch.relu(-self.get_current_inventory())
         return cost
 
     def order(self, q, seed=None):
         if seed is not None:
             torch.manual_seed(seed)
         # Current orders are added to past_orders
-        self.past_orders.append(q)
+        self.past_orders = torch.cat([self.past_orders, q], dim=1)
         # Past orders arrived
-        arrived_order = self.past_orders[-1 - self.lead_time]
+        arrived_order = self.past_orders[:, [-1 - self.lead_time]]
         # Generate demands and floored to integer
         current_demand = self.demand_generator.sample([self.batch_size, 1]).int()
         # Update inventory
-        current_inventory = self.past_inventories[-1] + arrived_order - current_demand
-        self.past_inventories.append(current_inventory)
+        current_inventory = (
+            self.get_current_inventory() + arrived_order - current_demand
+        )
+        # Current inventories are added to past_inventories
+        self.past_inventories = torch.cat(
+            [self.past_inventories, current_inventory], dim=1
+        )
 
 
 class DualSourcingModel(BaseSourcingModel):
@@ -137,27 +182,16 @@ class DualSourcingModel(BaseSourcingModel):
             with low=0 and high=5 which is equivalent to torch.randint(0, 4).
         """
         super().__init__(
-            holding_cost, shortage_cost, init_inventory, batch_size, demand_generator
+            regular_lead_time=regular_lead_time,
+            expedited_lead_time=expedited_lead_time,
+            regular_order_cost=regular_order_cost,
+            expedited_order_cost=expedited_order_cost,
+            holding_cost=holding_cost,
+            shortage_cost=shortage_cost,
+            init_inventory=init_inventory,
+            batch_size=batch_size,
+            demand_generator=demand_generator,
         )
-        self.regular_lead_time = regular_lead_time
-        self.expedited_lead_time = expedited_lead_time
-        self.regular_order_cost = regular_order_cost
-        self.expedited_order_cost = expedited_order_cost
-        self.reset()
-
-    def reset(self, batch_size=None):
-        if batch_size is not None and self.batch_size != batch_size:
-            self.batch_size = batch_size
-        self.past_inventories = [self.get_init_inventory()]
-        self.past_regular_orders = [torch.zeros([self.batch_size, 1])]
-        self.past_expedited_orders = [torch.zeros([self.batch_size, 1])]
-
-        if self.regular_lead_time > 0:
-            self.past_regular_orders = self.past_regular_orders * self.regular_lead_time
-        if self.expedited_lead_time > 0:
-            self.past_expedited_orders = (
-                self.past_expedited_orders * self.expedited_lead_time
-            )
 
     def get_past_regular_orders(self):
         return self.past_regular_orders
@@ -175,31 +209,39 @@ class DualSourcingModel(BaseSourcingModel):
         cost = (
             self.regular_order_cost * regular_q
             + self.expedited_order_cost * expedited_q
-            + self.holding_cost * torch.relu(self.past_inventories[-1])
-            + self.shortage_cost * torch.relu(-self.past_inventories[-1])
+            + self.holding_cost * torch.relu(self.get_current_inventory())
+            + self.shortage_cost * torch.relu(-self.get_current_inventory())
         )
         return cost
 
     def order(self, regular_q, expedited_q, seed=None):
         if seed is not None:
             torch.manual_seed(seed)
+        if not isinstance(regular_q, torch.Tensor):
+            regular_q = torch.tensor([[regular_q]])
+        if not isinstance(expedited_q, torch.Tensor):
+            expedited_q = torch.tensor([[expedited_q]])
         # Current regular order are added to past_regular_orders
-        self.past_regular_orders.append(regular_q)
+        self.past_regular_orders = torch.cat([self.past_regular_orders, regular_q], dim=1)
         # Current expedited order are added to past_expedited_orders
-        self.past_expedited_orders.append(expedited_q)
+        self.past_expedited_orders = torch.cat([self.past_expedited_orders, expedited_q], dim=1)
+        # Past regular orders arrived
+        arrived_regular_orders = self.past_regular_orders[
+            :, [-1 - self.regular_lead_time]
+        ]
         # Past expedited orders arrived
         arrived_expedited_orders = self.past_expedited_orders[
-            -1 - self.expedited_lead_time
+            :, [-1 - self.expedited_lead_time]
         ]
-        # Past orders arrived
-        arrived_regular_orders = self.past_regular_orders[-1 - self.regular_lead_time]
         # Generate demands and floored to integer
         current_demand = self.demand_generator.sample([self.batch_size, 1]).int()
         # Update inventory
         current_inventory = (
-            self.past_inventories[-1]
+            self.get_current_inventory()
             + arrived_expedited_orders
             + arrived_regular_orders
             - current_demand
         )
-        self.past_inventories.append(current_inventory)
+        self.past_inventories = torch.cat(
+            [self.past_inventories, current_inventory], dim=1
+        )
