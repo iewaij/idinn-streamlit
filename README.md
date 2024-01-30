@@ -1,4 +1,4 @@
-# idinn: A Python Package for Inventory-Dynamics Control with Neural Networks
+# idinn: Inventory-Dynamics Control with Neural Networks
 
 We provide a Python package, `idinn`, implementing inventory dynamics–informed neural 
 networks designed for controlling both single-sourcing and dual-sourcing problems. 

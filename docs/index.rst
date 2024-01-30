@@ -1,4 +1,4 @@
-idinn: A Python Package for Inventory-Dynamics Control with Neural Networks
+idinn: Inventory-Dynamics Control with Neural Networks
 ===========================================================================
 
 .. toctree::
