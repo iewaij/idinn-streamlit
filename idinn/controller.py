@@ -7,17 +7,64 @@ class NeuralControllerMixIn:
     def save(self, checkpoint_path):
         torch.save(self.state_dict(), checkpoint_path)
 
-    def resume(self, checkpoint_path):
+    def load(self, checkpoint_path):
         self.load_state_dict(torch.load(checkpoint_path))
 
 
-class SingleFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixIn):
+class SingleSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
+    """
+    SingleSourcingNeuralController is a neural network-based controller for inventory optimization in a single-sourcing scenario.
+
+    Parameters
+    ----------
+    hidden_layers : list
+        List of integers representing the number of units in each hidden layer. Default is [2].
+    activation : torch.nn.Module
+        Activation function to be used in the hidden layers. Default is torch.nn.CELU(alpha=1).
+
+    Attributes
+    ----------
+    hidden_layers : list
+        List of integers representing the number of units in each hidden layer.
+    activation : torch.nn.Module
+        Activation function used in the hidden layers.
+    stack : torch.nn.Sequential
+        Sequential stack of linear layers and activation functions.
+
+    Methods
+    -------
+    init_layers(lead_time)
+        Initializes the layers of the neural network based on the lead time.
+    forward(current_inventory, past_orders)
+        Performs forward pass through the neural network.
+    get_total_cost(sourcing_model, sourcing_periods, seed=None)
+        Calculates the total cost over a given number of sourcing periods.
+    train(sourcing_model, sourcing_periods, epochs, ...)
+        Trains the neural network controller using the sourcing model and specified parameters.
+    simulate(sourcing_model, sourcing_periods)
+        Simulates the inventory and order quantities over a given number of sourcing periods.
+    plot(sourcing_model, sourcing_periods)
+        Plots the inventory and order quantities over a given number of sourcing periods.
+    """
+
     def __init__(self, hidden_layers=[2], activation=torch.nn.CELU(alpha=1)):
         super().__init__()
         self.hidden_layers = hidden_layers
         self.activation = activation
 
     def init_layers(self, lead_time):
+        """
+        Initializes the layers of the neural network based on the lead time.
+
+        Parameters
+        ----------
+        lead_time : int
+            The lead time for sourcing.
+
+        Returns
+        -------
+        None
+        """
         self.lead_time = lead_time
         architecture = [
             torch.nn.Linear(lead_time + 1, self.hidden_layers[0]),
@@ -40,21 +87,47 @@ class SingleFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixI
         current_inventory,
         past_orders,
     ):
-        obs_list = [current_inventory]
-        if self.lead_time > 0:
-            if isinstance(past_orders, list):
-                order_obs = torch.cat(past_orders[-self.lead_time :], dim=-1)
-            else:
-                order_obs = past_orders[:, -self.lead_time :]
-            obs_list.append(order_obs)
+        """
+        Performs forward pass through the neural network.
 
-        h = torch.cat(obs_list, dim=-1)
+        Parameters
+        ----------
+        current_inventory : torch.Tensor
+            Current inventory levels.
+        past_orders : torch.Tensor
+            Past order quantities.
+
+        Returns
+        -------
+        torch.Tensor
+            Predicted order quantities.
+        """
+        if self.lead_time > 0:
+            h = torch.cat([current_inventory, past_orders[:, -self.lead_time :]], dim=1)
+        else:
+            h = current_inventory
         h = self.stack(h)
-        h = h - torch.frac(h).clone().detach()
-        q = h[:, 0].unsqueeze(-1)
+        q = h - torch.frac(h).clone().detach()
         return q
 
     def get_total_cost(self, sourcing_model, sourcing_periods, seed=None):
+        """
+        Calculates the total cost over a given number of sourcing periods.
+
+        Parameters
+        ----------
+        sourcing_model : SourcingModel
+            The sourcing model to be used for cost calculation.
+        sourcing_periods : int
+            The number of sourcing periods.
+        seed : int, optional
+            Random seed for reproducibility. Default is None.
+
+        Returns
+        -------
+        numpy.ndarray
+            Total cost over the sourcing periods.
+        """
         if seed is not None:
             torch.manual_seed(seed)
         total_cost = 0
@@ -78,6 +151,32 @@ class SingleFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixI
         seed=None,
         tensorboard_writer=None,
     ):
+        """
+        Trains the neural network controller using the sourcing model and specified parameters.
+
+        Parameters
+        ----------
+        sourcing_model : SourcingModel
+            The sourcing model to be used for training.
+        sourcing_periods : int
+            The number of sourcing periods for training.
+        epochs : int
+            The number of training epochs.
+        validation_sourcing_periods : int, optional
+            The number of sourcing periods for validation. Default is None.
+        lr_init_inventory : float, optional
+            Learning rate for initializing inventory. Default is 1e-1.
+        lr_parameters : float, optional
+            Learning rate for updating neural network parameters. Default is 3e-3.
+        seed : int, optional
+            Random seed for reproducibility. Default is None.
+        tensorboard_writer : tensorboard.SummaryWriter, optional
+            Tensorboard writer for logging. Default is None.
+
+        Returns
+        -------
+        None
+        """
         if seed is not None:
             torch.manual_seed(seed)
         lead_time = sourcing_model.get_lead_time()
@@ -130,10 +229,27 @@ class SingleFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixI
                         epoch,
                     )
                 tensorboard_writer.flush()
-
+        # Load the best model
         self.load_state_dict(best_state)
 
     def simulate(self, sourcing_model, sourcing_periods, seed=None):
+        """
+        Simulates the inventory and order quantities over a given number of sourcing periods.
+
+        Parameters
+        ----------
+        sourcing_model : SourcingModel
+            The sourcing model to be used for simulation.
+        sourcing_periods : int
+            The number of sourcing periods for simulation.
+        seed : int, optional
+            Random seed for reproducibility. Default is None.
+
+        Returns
+        -------
+        tuple
+            A tuple containing the past inventories and past orders as numpy arrays.
+        """
         if seed is not None:
             torch.manual_seed(seed)
         sourcing_model.reset(batch_size=1)
@@ -142,13 +258,25 @@ class SingleFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixI
             past_orders = sourcing_model.get_past_orders()
             q = self.forward(current_inventory, past_orders)
             sourcing_model.order(q)
-        past_inventories = sourcing_model.get_past_inventories()
-        past_inventories = list(map(int, past_inventories))
-        past_orders = sourcing_model.get_past_orders()
-        past_orders = list(map(int, past_orders))
+        past_inventories = sourcing_model.get_past_inventories()[0, :].detach().numpy()
+        past_orders = sourcing_model.get_past_orders()[0, :].detach().numpy()
         return past_inventories, past_orders
 
     def plot(self, sourcing_model, sourcing_periods):
+        """
+        Plots the inventory and order quantities over a given number of sourcing periods.
+
+        Parameters
+        ----------
+        sourcing_model : SourcingModel
+            The sourcing model to be used for plotting.
+        sourcing_periods : int
+            The number of sourcing periods for plotting.
+
+        Returns
+        -------
+        None
+        """
         past_inventories, past_orders = self.simulate(
             sourcing_model=sourcing_model, sourcing_periods=sourcing_periods
         )
@@ -167,7 +295,50 @@ class SingleFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixI
         ax[1].set_ylabel("Quantity")
 
 
-class DualFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixIn):
+class DualSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
+    """
+    DualSourcingNeuralController is a neural network controller for dual sourcing inventory optimization.
+
+    Parameters
+    ----------
+    hidden_layers : list
+        List of integers specifying the sizes of hidden layers.
+    activation : torch.nn.Module
+        Activation function to be used in the hidden layers.
+    compressed : bool
+        Flag indicating whether the input is compressed.
+
+    Attributes
+    ----------
+    hidden_layers : list
+        List of integers specifying the sizes of hidden layers.
+    activation : torch.nn.Module
+        Activation function to be used in the hidden layers.
+    compressed : bool
+        Flag indicating whether the input is compressed.
+    regular_lead_time : int
+        Regular lead time.
+    expedited_lead_time : int
+        Expedited lead time.
+    stack : torch.nn.Sequential
+        Sequential stack of linear layers and activation functions.
+
+    Methods
+    -------
+    init_layers(regular_lead_time, expedited_lead_time)
+        Initialize the layers of the neural network.
+    forward(current_inventory, past_orders)
+        Forward pass of the neural network.
+    get_total_cost(sourcing_model, sourcing_periods, seed=None)
+        Calculate the total cost of the sourcing model.
+    train(sourcing_model, sourcing_periods, epochs, validation_sourcing_periods=None, lr_init_inventory=1e-1, lr_parameters=3e-3, seed=None, tensorboard_writer=None)
+        Train the neural network.
+    simulate(sourcing_model, sourcing_periods, seed=None)
+        Simulate the sourcing model using the neural network.
+    plot(sourcing_model, sourcing_periods)
+        Plot the inventory and order quantities.
+    """
+
     def __init__(
         self,
         hidden_layers=[128, 64, 32, 16, 8, 4],
@@ -180,6 +351,20 @@ class DualFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixIn)
         self.compressed = compressed
 
     def init_layers(self, regular_lead_time, expedited_lead_time):
+        """
+        Initialize the layers of the neural network.
+
+        Parameters
+        ----------
+        regular_lead_time : int
+            Regular lead time.
+        expedited_lead_time : int
+            Expedited lead time.
+
+        Returns
+        -------
+        None
+        """
         self.regular_lead_time = regular_lead_time
         self.expedited_lead_time = expedited_lead_time
         if self.compressed:
@@ -204,41 +389,67 @@ class DualFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixIn)
         self.stack = torch.nn.Sequential(*architecture)
 
     def forward(self, current_inventory, past_regular_orders, past_expedited_orders):
-        if self.compressed:
-            obs_list = []
-        else:
-            obs_list = [current_inventory]
+        """
+        Forward pass of the neural network.
 
+        Parameters
+        ----------
+        current_inventory : torch.Tensor
+            Current inventory.
+        past_regular_orders : torch.Tensor
+            Past regular orders.
+        past_expedited_orders : torch.Tensor
+            Past expedited orders.
+
+        Returns
+        -------
+        regular_q : torch.Tensor
+            Regular order quantity.
+        expedited_q : torch.Tensor
+            Expedited order quantity.
+        """
         if self.regular_lead_time > 0:
-            if isinstance(past_regular_orders, list):
-                order_obs = torch.cat(
-                    past_regular_orders[-self.regular_lead_time :], dim=-1
-                )
-            else:
-                order_obs = past_regular_orders[:, -self.regular_lead_time :]
-
             if self.compressed:
-                order_obs[0] += current_inventory
-
-            obs_list.append(order_obs)
+                inputs = past_regular_orders[:, -self.regular_lead_time :]
+                inputs[:, 0] += current_inventory
+            else:
+                inputs = torch.cat(
+                    [
+                        current_inventory,
+                        past_regular_orders[:, -self.regular_lead_time :],
+                    ],
+                    dim=1,
+                )
 
         if self.expedited_lead_time > 0:
-            if isinstance(past_expedited_orders, list):
-                order_obs = torch.cat(
-                    past_expedited_orders[-self.expedited_lead_time :], dim=-1
-                )
-            else:
-                order_obs = past_expedited_orders[:, -self.expedited_lead_time :]
-            obs_list.append(order_obs)
+            inputs = torch.cat(
+                [inputs, past_expedited_orders[:, -self.expedited_lead_time :]], dim=1
+            )
 
-        h = torch.cat(obs_list, dim=-1)
-        h = self.stack(h)
-        h = h - torch.frac(h).clone().detach()
-        regular_q = h[:, 0].unsqueeze(-1)
-        expedited_q = h[:, 1].unsqueeze(-1)
+        h = self.stack(inputs)
+        q = h - torch.frac(h).clone().detach()
+        regular_q = q[:, [0]]
+        expedited_q = q[:, [1]]
         return regular_q, expedited_q
 
     def get_total_cost(self, sourcing_model, sourcing_periods, seed=None):
+        """
+        Calculate the total cost of the sourcing model.
+
+        Parameters
+        ----------
+        sourcing_model : Sourcing model.
+            Sourcing model.
+        sourcing_periods : int
+            Number of sourcing periods.
+        seed : int, optional
+            Random seed for reproducibility.
+
+        Returns
+        -------
+        total_cost : torch.Tensor
+            Total cost.
+        """
         if seed is not None:
             torch.manual_seed(seed)
         total_cost = 0
@@ -265,6 +476,28 @@ class DualFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixIn)
         seed=None,
         tensorboard_writer=None,
     ):
+        """
+        Train the neural network.
+
+        Parameters
+        ----------
+        sourcing_model : Sourcing model
+            Sourcing model.
+        sourcing_periods : int
+            Number of sourcing periods.
+        epochs : int
+            Number of training epochs.
+        validation_sourcing_periods : int, optional
+            Number of sourcing periods for validation.
+        lr_init_inventory : float, optional
+            Learning rate for initializing inventory.
+        lr_parameters : float, optional
+            Learning rate for neural network parameters.
+        seed : int, optional
+            Random seed for reproducibility.
+        tensorboard_writer : TensorBoard writer, optional
+            TensorBoard writer for logging.
+        """
         if seed is not None:
             torch.manual_seed(seed)
         regular_lead_time = sourcing_model.get_regular_lead_time()
@@ -318,6 +551,28 @@ class DualFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixIn)
         self.load_state_dict(best_state)
 
     def simulate(self, sourcing_model, sourcing_periods, seed=None):
+        """
+        Simulate the sourcing model using the neural network.
+
+        Parameters
+        ----------
+        sourcing_model : Sourcing model
+            The sourcing model.
+        sourcing_periods : int
+            Number of sourcing periods.
+        seed : int, optional
+            Random seed for reproducibility.
+
+        Returns
+        -------
+        past_inventories : list
+            List of past inventories.
+        past_regular_orders : list
+            List of past regular orders.
+        past_expedited_orders : list
+            List of past expedited orders.
+
+        """
         if seed is not None:
             torch.manual_seed(seed)
         sourcing_model.reset(batch_size=1)
@@ -329,15 +584,31 @@ class DualFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixIn)
                 current_inventory, past_regular_orders, past_expedited_orders
             )
             sourcing_model.order(regular_q, expedited_q)
-        past_inventories = sourcing_model.get_past_inventories()
-        past_inventories = list(map(int, past_inventories))
-        past_regular_orders = sourcing_model.get_past_regular_orders()
-        past_regular_orders = list(map(int, past_inventories))
-        past_expedited_orders = sourcing_model.get_past_expedited_orders()
-        past_expedited_orders = list(map(int, past_expedited_orders))
+        past_inventories = sourcing_model.get_past_inventories()[0, :].detach().numpy()
+        past_regular_orders = (
+            sourcing_model.get_past_regular_orders()[0, :].detach().numpy()
+        )
+        past_expedited_orders = (
+            sourcing_model.get_past_expedited_orders()[0, :].detach().numpy()
+        )
         return past_inventories, past_regular_orders, past_expedited_orders
 
     def plot(self, sourcing_model, sourcing_periods):
+        """
+        Plot the inventory and order quantities.
+
+        Parameters
+        ----------
+        sourcing_model : Sourcing model
+            The sourcing model.
+        sourcing_periods : int
+            Number of sourcing periods.
+
+        Returns
+        -------
+        None
+
+        """
         past_inventories, past_regular_orders, past_expedited_orders = self.simulate(
             sourcing_model=sourcing_model, sourcing_periods=sourcing_periods
         )
@@ -366,24 +637,29 @@ class DualFullyConnectedNeuralController(torch.nn.Module, NeuralControllerMixIn)
 
 
 class CappedDualIndexController:
+    """
+    Controller class for capped dual index inventory optimization.
+
+    Parameters
+    ----------
+    s_e : int
+        Capped dual index parameter 1
+    s_r : int
+        Capped dual index parameter 2
+    q_r : int
+        Capped dual index parameter 3
+
+    Notes
+    -----
+    The function follows the implementation of Sun, J., & Van Mieghem, J. A. (2019)([1]_).
+
+    References
+    ----------
+    .. [1] Robust dual sourcing inventory management: Optimality of capped dual index policies and smoothing.
+           Manufacturing & Service Operations Management, 21(4), 912-931.
+    """
+
     def __init__(self, s_e=0, s_r=0, q_r=0):
-        """
-        Parameters
-        ----------
-        s_e: int
-            Capped dual index parameter 1
-        s_r: int
-            Capped dual index parameter 2
-        q_r: int
-            Capped dual index parameter 3
-
-        Notes
-        -----
-        The function follows the implemetation of Sun, J., & Van Mieghem, J. A. (2019)([1]_).
-
-        .. [1] Robust dual sourcing inventory management: Optimality of capped dual index policies and smoothing.
-        Manufacturing & Service Operations Management, 21(4), 912-931.
-        """
         self.s_e = s_e
         self.s_r = s_r
         self.q_r = q_r
@@ -398,19 +674,41 @@ class CappedDualIndexController:
         k,
     ):
         """
-        Implementation of Eq. (3) of Sun, J., & Van Mieghem, J. A. (2019)([1]_).
+        Calculate the capped dual index sum.
 
-        
+        Parameters
+        ----------
+        current_inventory : int
+            Current inventory level.
+        past_regular_orders : numpy.ndarray
+            Array of past regular orders.
+        past_expedited_orders : numpy.ndarray
+            Array of past expedited orders.
+        regular_lead_time : int
+            Regular lead time.
+        expedited_lead_time : int
+            Expedited lead time.
+        k : int
+            Parameter for capped dual index sum calculation.
+
+        Returns
+        -------
+        int
+            The capped dual index sum.
         """
-        inventory_position = current_inventory + sum(
-            past_regular_orders[-regular_lead_time + i] for i in range(k + 1)
+        inventory_position = (
+            current_inventory
+            + past_regular_orders[
+                :, -regular_lead_time : -regular_lead_time + k + 1
+            ].sum()
         )
         if expedited_lead_time > max(1, expedited_lead_time - k):
-            inventory_position += sum(
-                past_expedited_orders[-expedited_lead_time + i]
-                for i in range(min(k, expedited_lead_time - 1) + 1)
-            )
-        return int(inventory_position)
+            inventory_position += past_expedited_orders[
+                -expedited_lead_time : -expedited_lead_time
+                + min(k, expedited_lead_time - 1)
+                + 1
+            ].sum()
+        return inventory_position
 
     def forward(
         self,
@@ -420,6 +718,27 @@ class CappedDualIndexController:
         regular_lead_time,
         expedited_lead_time,
     ):
+        """
+        Perform forward calculation for capped dual index optimization.
+
+        Parameters
+        ----------
+        current_inventory : int
+            Current inventory level.
+        past_regular_orders : numpy.ndarray
+            Array of past regular orders.
+        past_expedited_orders : numpy.ndarray
+            Array of past expedited orders.
+        regular_lead_time : int
+            Regular lead time.
+        expedited_lead_time : int
+            Expedited lead time.
+
+        Returns
+        -------
+        tuple
+            A tuple containing the regular order quantity and expedited order quantity.
+        """
         inventory_position = self.capped_dual_index_sum(
             current_inventory,
             past_regular_orders,
@@ -441,6 +760,23 @@ class CappedDualIndexController:
         return regular_q, expedited_q
 
     def get_total_cost(self, sourcing_model, sourcing_periods, seed=None):
+        """
+        Calculate the total cost for capped dual index optimization.
+
+        Parameters
+        ----------
+        sourcing_model : SourcingModel
+            The sourcing model.
+        sourcing_periods : int
+            Number of sourcing periods.
+        seed : int, optional
+            Random seed for reproducibility.
+
+        Returns
+        -------
+        float
+            The total cost.
+        """
         if seed is not None:
             torch.manual_seed(seed)
         regular_lead_time = sourcing_model.get_regular_lead_time()
@@ -459,7 +795,7 @@ class CappedDualIndexController:
             )
             sourcing_model.order(regular_q, expedited_q)
             current_cost = sourcing_model.get_cost(regular_q, expedited_q)
-            total_cost += current_cost.mean()
+            total_cost += current_cost
         return total_cost
 
     def train(
@@ -471,6 +807,24 @@ class CappedDualIndexController:
         q_r_range=np.arange(2, 11),
         seed=None,
     ):
+        """
+        Train the capped dual index controller.
+
+        Parameters
+        ----------
+        sourcing_model : SourcingModel
+            The sourcing model.
+        sourcing_periods : int
+            Number of sourcing periods.
+        s_e_range : numpy.ndarray, optional
+            Range of values for s_e.
+        s_r_range : numpy.ndarray, optional
+            Range of values for s_r.
+        q_r_range : numpy.ndarray, optional
+            Range of values for q_r.
+        seed : int, optional
+            Random seed for reproducibility.
+        """
         if seed is not None:
             torch.manual_seed(seed)
         min_cost = np.inf
@@ -492,6 +846,23 @@ class CappedDualIndexController:
         self.q_r = q_r_optimal
 
     def simulate(self, sourcing_model, sourcing_periods, seed=None):
+        """
+        Simulate the capped dual index controller.
+
+        Parameters
+        ----------
+        sourcing_model : SourcingModel
+            The sourcing model.
+        sourcing_periods : int
+            Number of sourcing periods.
+        seed : int, optional
+            Random seed for reproducibility.
+
+        Returns
+        -------
+        tuple
+            A tuple containing the past inventories, past regular orders, and past expedited orders.
+        """
         if seed is not None:
             torch.manual_seed(seed)
         sourcing_model.reset()
@@ -509,15 +880,26 @@ class CappedDualIndexController:
                 expedited_lead_time,
             )
             sourcing_model.order(regular_q, expedited_q)
-        past_inventories = sourcing_model.get_past_inventories()
-        past_inventories = list(map(int, past_inventories))
-        past_regular_orders = sourcing_model.get_past_regular_orders()
-        past_regular_orders = list(map(int, past_inventories))
-        past_expedited_orders = sourcing_model.get_past_expedited_orders()
-        past_expedited_orders = list(map(int, past_expedited_orders))
+        past_inventories = sourcing_model.get_past_inventories()[0, :].detach().numpy()
+        past_regular_orders = (
+            sourcing_model.get_past_regular_orders()[0, :].detach().numpy()
+        )
+        past_expedited_orders = (
+            sourcing_model.get_past_expedited_orders()[0, :].detach().numpy()
+        )
         return past_inventories, past_regular_orders, past_expedited_orders
 
     def plot(self, sourcing_model, sourcing_periods):
+        """
+        Plot the simulation results.
+
+        Parameters
+        ----------
+        sourcing_model : SourcingModel
+            The sourcing model.
+        sourcing_periods : int
+            Number of sourcing periods.
+        """
         past_inventories, past_regular_orders, past_expedited_orders = self.simulate(
             sourcing_model=sourcing_model, sourcing_periods=sourcing_periods
         )
