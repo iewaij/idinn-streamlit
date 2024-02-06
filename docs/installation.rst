@@ -1,0 +1,32 @@
+Installation
+============
+
+Requirements
+------------
+
+The basic usage of `idinn` requires a working `Python`_ and `PyTorch`_ installation. If plotting simulation result of a controller is needed, `matplotlib`_ should also be installed.
+
+* Python_     ``>= 3.8``
+* PyTorch_    ``>= 2.0``
+* matplotlib_ ``>= 3.0``
+
+Install `idinn`
+---------------
+
+The package can be installed form the git repository. To do that, run
+
+.. code-block::
+
+   python -m pip install git+https://gitlab.com/ComputationalScience/inventory-optimization.git@main
+
+Or, if you want to inspect the source code and edit locally, run
+
+.. code-block::
+
+   git clone https://gitlab.com/ComputationalScience/inventory-optimization.git
+   cd inventory-optimization
+   python -m pip install -e .
+
+.. _Python: https://www.python.org/downloads/
+.. _PyTorch: https://pytorch.org/get-started/locally/
+.. _matplotlib: https://matplotlib.org/stable/users/getting_started/

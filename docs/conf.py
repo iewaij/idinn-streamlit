@@ -1,19 +1,20 @@
 # Configuration file for the Sphinx documentation builder.
+#
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = "Inventory Optimization"
-copyright = "2023, J. Li., L. Böttcher, T. Asikis, I. Fragkos"
-author = "J. Li, L. Böttcher, T. Asikis, I. Fragkos."
+project = "idinn"
+copyright = "2024, J. Li, L. Böttcher, T. Asikis, I. Fragkos"
+author = "J. Li, L. Böttcher, T. Asikis, I. Fragkos"
+release = "0.1.0"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    "myst_parser",
     "sphinx.ext.duration",
     "sphinx.ext.doctest",
     "sphinx.ext.autodoc",
