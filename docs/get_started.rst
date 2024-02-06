@@ -42,10 +42,10 @@ This controller needs to be trained to find the optimal weights in the neural ne
       epochs=5000
    )
 
-After the training completes, we can inspect how the controller perform in the specified sourcing environment by plotting the inventory and order history of certain periods.
-
 Simulation and Plotting
 -----------------------
+
+After the training completes, we can inspect how the controller perform in the specified sourcing environment by plotting the inventory and order history of certain periods.
 
 .. code-block:: python
 

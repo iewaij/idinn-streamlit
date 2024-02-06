@@ -1,20 +1,20 @@
 # idinn: Inventory-Dynamics Control with Neural Networks
 
-We provide a Python package, `idinn`, implementing inventory dynamics–informed neural 
-networks designed for controlling both single-sourcing and dual-sourcing problems. 
-Neural network controllers and inventory dynamics are implemented in two easily customizable 
-classes, enabling users to control extensions of the provided inventory management 
-systems by tailoring the implementations to their needs.
+`idinn` implements inventory dynamics–informed neural networks designed for solving both single-sourcing and dual-sourcing problems. Neural network controllers and inventory dynamics are implemented into easily customizable classes to enable users to find the optimal controllers for the user-specified inventory systems.
+
+## Requirements
+
+The basic usage of `idinn` requires a working `Python` and `PyTorch` installation. If plotting simulation result of a controller is needed, `matplotlib` should also be installed.
 
 ## Installation
 
-The package can be installed directly form Gitlab repository. To do that, run
+The package can be installed form the git repository. To do that, run
 
 ```
 python -m pip install git+https://gitlab.com/ComputationalScience/inventory-optimization.git@main
 ```
 
-Or, if you want to access the source code and perform local editing, run
+Or, if you want to inspect the source code and edit locally, run
 
 ```
 git clone https://gitlab.com/ComputationalScience/inventory-optimization.git
@@ -22,7 +22,7 @@ cd inventory-optimization
 python -m pip install -e .
 ```
 
-## Quick Start
+## Example Usage
 
 ```python
 import torch
@@ -54,9 +54,13 @@ controller.forward(
 )
 ```
 
-## Papers using ``idinn``
+## Documentaion
 
-We will add papers that use ``ìdinn`` to this list as they appear online.
+For more detailed guides and documentaion, please refer to our [documentation](https://inventory-optimization.readthedocs.io/en/latest/).
+
+## Papers using `idinn`
+
+We will add papers that use `ìdinn` to this list as they appear online.
 
 * Böttcher, Lucas, Thomas Asikis, and Ioannis Fragkos. "Control of Dual-Sourcing Inventory Systems Using Recurrent Neural Networks." [INFORMS Journal on Computing](https://pubsonline.informs.org/doi/abs/10.1287/ijoc.2022.0136) 35.6 (2023): 1308-1328.
 
