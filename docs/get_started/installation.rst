@@ -1,8 +1,9 @@
+************
 Installation
-============
+************
 
 Requirements
-------------
+============
 
 The basic usage of `idinn` requires a working `Python`_ and `PyTorch`_ installation. If plotting simulation result of a controller is needed, `matplotlib`_ should also be installed. We recommend using the following versions for maximum 
 
@@ -11,7 +12,7 @@ The basic usage of `idinn` requires a working `Python`_ and `PyTorch`_ installat
 * matplotlib_ ``>= 3.0``
 
 Install `idinn`
----------------
+===============
 
 The package can be installed form the git repository. To do that, run
 

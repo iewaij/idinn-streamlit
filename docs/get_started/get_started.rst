@@ -4,7 +4,7 @@ Get Started
 Initialization
 --------------
 
-The basic usage of `idinn` starts with a sourcing model and a controller. First initialize a sourcing model, such as :class:`SingleSourcingModel`, with desired parameters according to their needs.
+The basic usage of `idinn` starts with a sourcing model and a controller. First initialize a sourcing model, such as :class:`SingleSourcingModel`, with desired parameters according to users' needs.
 
 .. code-block:: python
     
@@ -20,7 +20,7 @@ The basic usage of `idinn` starts with a sourcing model and a controller. First 
       init_inventory=10
    )
 
-Afterwards, initialize a controller that is compatible with their sourcing model which is :class:`SingleFullyConnectedNeuralController`.
+Afterwards, initialize a controller that is compatible with the chosen sourcing model which is :class:`SingleFullyConnectedNeuralController`.
 
 .. code-block:: python
 
@@ -42,8 +42,8 @@ This controller needs to be trained to find the optimal weights in the neural ne
       epochs=5000
    )
 
-Simulation and Plotting
------------------------
+Simulation, Plotting and Order Calculation
+------------------------------------------
 
 After the training completes, we can inspect how the controller perform in the specified sourcing environment by plotting the inventory and order history of certain periods.
 
@@ -52,10 +52,8 @@ After the training completes, we can inspect how the controller perform in the s
    # Simulate and plot the results
    controller.plot(sourcing_model=sourcing_model, sourcing_periods=100)
 
-Order Calculation
------------------
 
-The trained controller can also be use for best order quantity calculations.
+The trained controller can be used for optimal order quantity calculations.
 
 .. code-block:: python
 

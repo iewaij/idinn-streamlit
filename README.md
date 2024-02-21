@@ -1,10 +1,10 @@
 # idinn: Inventory-Dynamics Control with Neural Networks
 
-`idinn` implements inventory dynamics–informed neural networks designed for solving both single-sourcing and dual-sourcing problems. Neural network controllers and inventory dynamics are implemented into easily customizable classes to enable users to find the optimal controllers for the user-specified inventory systems.
+`idinn` implements **i**nventory **d**ynamics–**i**nformed **n**eural **n**etworks designed for solving both single-sourcing and dual-sourcing problems. Neural network controllers and inventory dynamics are implemented into easily customizable classes to enable users to find the optimal controllers for the user-specified inventory systems.
 
 ## Requirements
 
-The basic usage of `idinn` requires a working `Python` and `PyTorch` installation. If plotting simulation result of a controller is needed, `matplotlib` should also be installed.
+The basic usage of `idinn` requires working `Python` and `PyTorch` installation. If plotting simulation result of a controller is needed, `matplotlib` should also be installed.
 
 ## Installation
 
@@ -56,7 +56,7 @@ controller.forward(
 
 ## Documentaion
 
-For more detailed guides and documentaion, please refer to our [documentation](https://inventory-optimization.readthedocs.io/en/latest/).
+For tutorials and documentation, please refer to our [documentation](https://inventory-optimization.readthedocs.io/en/latest/).
 
 ## Papers using `idinn`
 
@@ -66,7 +66,7 @@ We will add papers that use `ìdinn` to this list as they appear online.
 
 ## Contributors
 
-* [Jiawei Li](https://gitlab.com/iewaij)
+* [Jiawei Li](https://github.com/iewaij)
 * [Thomas Asikis](https://gitlab.com/asikist)
 * [Ioannis Fragkos](https://gitlab.com/ioannis.fragkos1)
 * [Lucas Böttcher](https://gitlab.com/lucasboettcher)

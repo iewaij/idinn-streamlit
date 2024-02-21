@@ -1,0 +1,106 @@
+Solve Dual-Sourcing Problems Using Neural Networks
+==================================================
+
+Dual-sourcing problems are closely related to single-sourcing problems, but they are more complex. In a dual-sourcing problem, a company has two potential suppliers for a product with different lead time (how long it takes for the order to arrive) and order costs (how costly to place an order). The company must decide which supplier to use for each product in order to minimize costs. We can solve dual-sourcing problems with `idinn` in the similar fashion demonstrated in :doc:`/get_started/get_started` and :doc:`/tutorials/single`.
+
+Initialization
+--------------
+
+To solve dual-sourcing problems, we use the `DualSourcingModel` class to initialize the sourcing model and the `DualFullyConnectedNeuralController` class as controllers. In this tutorial, we use a dual sourcing model which has regular order lead time of 0, expedited order lead time of 0, regular order cost, :math:`c^r` , at 0, expedited order cost, :math:`c^e`, at 20, initial inventory at 6 and batch size of 256. The holding cost, :math:`h`, is 5 and the shortage cost, :math:`s`, is 495. The demand is generated from a uniform distribution with interval :math:`[0, 5)`. Note that the `high` parameter is exclusive (open bracket), the generated demand will therefore never exceed 4. In code, the sourcing model is initialized as follows:
+
+.. code-block:: python
+    
+   import torch
+   from idinn.sourcing_model import DualSourcingModel
+   from idinn.controller import DualFullyConnectedNeuralController
+
+    dual_sourcing_model = DualSourcingModel(
+        regular_lead_time=2,
+        expedited_lead_time=0,
+        regular_order_cost=0,
+        expedited_order_cost=20,
+        holding_cost=5,
+        shortage_cost=495,
+        batch_size=256,
+        init_inventory=6,
+    )
+
+The cost at period :math:`t`, :math:`c_t`, is calculated as:
+
+.. math::
+
+   c_t = c^r q^r_t + c^e q^e_t + h \cdot \max(0, I_t) + s \cdot \max(0, - I_t)
+
+where :math:`I_t` is the inventory level at period :math:`t`, :math:`q^r_t` is the regular order sent at period :math:`t`, :math:`q^e_t` is the expedited order sent at period :math:`t`. The higher the holding cost, more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, more costly it is to run out of stock (when the inventory level is negative). The higher the regular or expedited order costs, more costly it is to send the respective orders. The cost can be calculated using the `get_cost` method of the sourcing model, given the quantity of the regular and expedited orders.
+
+.. code-block:: python
+    
+   dual_sourcing_model.get_cost(regular_q=0, expedited_q=0)
+
+which should return 30 for each sample since the initial inventory is 6, the holding cost is 5 and there is no regular nor expedited order. We have 256 samples in this case because we specified batch size at 256.
+
+We then initialize the neural network controller for dual-sourcing problems using the `DualFullyConnectedNeuralController` class. In this tutorial, we use a simple neural network with 6 hidden layer with 128, 64, 32, 16, 8, 4 neurons, respectively. The activation function is `torch.nn.CELU(alpha=1)`. The neural network controller is initialized as follows:
+
+.. code-block:: python
+
+    dual_controller = SingleFullyConnectedNeuralController(
+        hidden_layers=[128, 64, 32, 16, 8, 4], activation=torch.nn.CELU(alpha=1)
+    )
+
+Training
+--------
+
+Even though the neural network controller is not trained yet, we can already use it to calculate the total cost if we use this controller for 100 periods with our previously specified sourcing model.
+
+.. code-block:: python
+
+    dual_controller.get_total_cost(sourcing_model=dual_sourcing_model, sourcing_periods=100)
+
+Unsurprisingly, the performance is poor because we are only using the untrained neural network in which the weights are just random numbers. We can train the neural network controller using the `train` method where the training data is generated from the given sourcing model. To better monitor the training process, we specify the `tensorboard_writer` parameter to log the training loss and validation loss. For reproducibility, we also specify the random seed using the `seed` parameter.
+
+.. code-block:: python
+
+    from torch.utils.tensorboard import SummaryWriter
+
+    dual_controller.train(
+        sourcing_model=dual_sourcing_model,
+        sourcing_periods=100,
+        validation_sourcing_periods=1000,
+        epochs=2000,
+        tensorboard_writer=SummaryWriter("runs/dual_sourcing_model"),
+        seed=4,
+    )
+
+After training, we can use the trained neural network controller to calculate the total cost for 100 periods with our previously specified sourcing model. The total cost should be significantly lower than the previous one.
+
+.. code-block:: python
+    
+    dual_controller.get_total_cost(sourcing_model=dual_sourcing_model, sourcing_periods=100)
+
+Simulation, Plotting and Order Calculation
+------------------------------------------
+
+We can also inspect how the controller perform in the specified sourcing environment by plotting the inventory and order history, and calculate optimal orders for applications.
+
+.. code-block:: python
+
+    # Simulate and plot the results
+    dual_controller.plot(sourcing_model=dual_sourcing_model, sourcing_periods=100)
+    # Calculate the optimal order quantity for applications
+    regular_q, expedited_q = dual_controller.forward(
+        current_inventory=torch.tensor([[10]]),
+        past_regular_orders=torch.tensor([[1, 5]]),
+        past_expedited_orders=torch.tensor([[0, 0]]),
+    )
+
+Save and Load the Model
+-----------------------
+
+It is also a good idea to save the trained neural network controller for future use. This can be done using the `save` method and the `load` method.
+
+.. code-block:: python
+
+    # Save the model
+    dual_controller.save("optimal_dual_sourcing_controller.pt")
+    # Load the model
+    dual_controller_loaded = DualFullyConnectedNeuralController().load("optimal_dual_sourcing_controller.pt")
