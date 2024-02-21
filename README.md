@@ -56,7 +56,7 @@ controller.forward(
 )
 ```
 
-## Documentaion
+## Documentation
 
 For tutorials and documentation, please refer to our [documentation](https://inventory-optimization.readthedocs.io/en/latest/).
 
