@@ -3,7 +3,7 @@ idinn: Inventory-Dynamics Control with Neural Networks
 ######################################################
 
 ..  youtube:: hUBfTWV6tWQ
-   :align: center
+   :width: 100%
 
 `idinn` implements inventory dynamics–informed neural networks designed for solving both single-sourcing and dual-sourcing problems. Neural network controllers and inventory dynamics are implemented into easily customizable classes, such as :class:`SingleSourcingModel` and :class:`SingleSourcingNeuralController`, to enable users to find the optimal controllers for the user-specified inventory systems.
 
