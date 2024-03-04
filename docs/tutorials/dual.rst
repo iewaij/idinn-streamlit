@@ -1,12 +1,12 @@
 Solve Dual-Sourcing Problems Using Neural Networks
 ==================================================
 
-Dual-sourcing problems are closely related to single-sourcing problems, but they are more complex. In a dual-sourcing problem, a company has two potential suppliers for a product with different lead time (how long it takes for the order to arrive) and order costs (how costly to place an order). The company must decide which supplier to use for each product in order to minimize costs. We can solve dual-sourcing problems with `idinn` in the similar fashion demonstrated in :doc:`/get_started/get_started` and :doc:`/tutorials/single`.
+Dual-sourcing problems are similar to single-sourcing problems but are more intricate. In a dual-sourcing problem, a company has two potential suppliers for a product, each offering varying lead times (the duration for orders to arrive) and order costs (the expense of placing an order). The challenge lies in the company's decision-making process: determining which supplier to engage for each product to minimize costs given stochastic demand. We can solve dual-sourcing problems with `idinn` in a way similar to the approaches describes described in :doc:`/get_started/get_started` and :doc:`/tutorials/single`.
 
 Initialization
 --------------
 
-To solve dual-sourcing problems, we use the `DualSourcingModel` class to initialize the sourcing model and the `DualFullyConnectedNeuralController` class as controllers. In this tutorial, we use a dual sourcing model which has regular order lead time of 0, expedited order lead time of 0, regular order cost, :math:`c^r` , at 0, expedited order cost, :math:`c^e`, at 20, initial inventory at 6 and batch size of 256. The holding cost, :math:`h`, is 5 and the shortage cost, :math:`s`, is 495. The demand is generated from a uniform distribution with interval :math:`[0, 5)`. Note that the `high` parameter is exclusive (open bracket), the generated demand will therefore never exceed 4. In code, the sourcing model is initialized as follows:
+To address dual-sourcing problems, we employ two main classes: `DualSourcingModel` and `DualFullyConnectedNeuralController`, responsible for setting up the sourcing model and its corresponding controller. In this tutorial, we adopt a dual sourcing model with specific parameters: regular order lead time and expedited order lead time both set to 0, regular order cost, :math:`c^r`, at 0, expedited order cost, :math:`c^e`, at 20, initial inventory of 6, and a batch size of 256. Additionally, the holding cost, :math:`h`, is 5, while the shortage cost, :math:`s`, is 495. Demand is generated from a uniform distribution with the interval :math:`[0, 5)`. Notice that the `high` parameter is exclusive. Hence, the generated demand never exceeds 4. In our code, the sourcing model is initialized as follows.
 
 .. code-block:: python
     
