@@ -31,15 +31,15 @@ The cost at period :math:`t`, :math:`c_t`, is
 
    c_t = c^r q^r_t + c^e q^e_t + h \cdot \max(0, I_t) + s \cdot \max(0, - I_t)\,,
 
-where :math:`I_t` is the inventory level at period :math:`t`, :math:`q^r_t` is the regular order sent at period :math:`t`, :math:`q^e_t` is the expedited order sent at period :math:`t`. The higher the holding cost, more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, more costly it is to run out of stock (when the inventory level is negative). The higher the regular or expedited order costs, more costly it is to send the respective orders. The cost can be calculated using the `get_cost` method of the sourcing model, given the quantity of the regular and expedited orders.
+where :math:`I_t` is the inventory level at period :math:`t`, :math:`q^r_t` is the regular order sent at period :math:`t`, :math:`q^e_t` is the expedited order sent at period :math:`t`. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The higher the regular or expedited order costs, the more costly it is to send the respective orders. The cost can be calculated using the `get_cost` method of the sourcing model.
 
 .. code-block:: python
     
    dual_sourcing_model.get_cost(regular_q=0, expedited_q=0)
 
-which should return 30 for each sample since the initial inventory is 6, the holding cost is 5 and there is no regular nor expedited order. We have 256 samples in this case because we specified batch size at 256.
+In our example, this function should return 30 for each sample since the initial inventory is 6, the holding cost is 5, and there is neither a regular nor expedited order. We have 256 samples in this case, as we specified a batch size of 256.
 
-We then initialize the neural network controller for dual-sourcing problems using the `DualFullyConnectedNeuralController` class. In this tutorial, we use a simple neural network with 6 hidden layer with 128, 64, 32, 16, 8, 4 neurons, respectively. The activation function is `torch.nn.CELU(alpha=1)`. The neural network controller is initialized as follows:
+For dual-sourcing problems, we initialize the neural network controller using the `DualFullyConnectedNeuralController` class. In this tutorial, we use a simple neural network with 6 hidden layers and 128, 64, 32, 16, 8, 4 neurons, respectively. The activation function is `torch.nn.CELU(alpha=1)`. The neural network controller is initialized as follows.
 
 .. code-block:: python
 
@@ -50,13 +50,13 @@ We then initialize the neural network controller for dual-sourcing problems usin
 Training
 --------
 
-Even though the neural network controller is not trained yet, we can already use it to calculate the total cost if we use this controller for 100 periods with our previously specified sourcing model.
+Although the neural network controller has not been trained yet, we can still utilize it to calculate the total cost if we apply this controller for 100 periods alongside our previously specified sourcing model.
 
 .. code-block:: python
 
     dual_controller.get_total_cost(sourcing_model=dual_sourcing_model, sourcing_periods=100)
 
-Unsurprisingly, the performance is poor because we are only using the untrained neural network in which the weights are just random numbers. We can train the neural network controller using the `train` method where the training data is generated from the given sourcing model. To better monitor the training process, we specify the `tensorboard_writer` parameter to log the training loss and validation loss. For reproducibility, we also specify the random seed using the `seed` parameter.
+Unsurprisingly, the performance is poor because we are only using the untrained neural network in which the weights are just (pseudo) random numbers. We can train the neural network controller using the `train` method, in which the training data is generated from the given sourcing model. To better monitor the training process, we specify the `tensorboard_writer` parameter to log both the training loss and validation loss. For reproducibility, we also specify the seed of the underlying random number generator using the  `seed` parameter.
 
 .. code-block:: python
 
@@ -71,7 +71,7 @@ Unsurprisingly, the performance is poor because we are only using the untrained 
         seed=4,
     )
 
-After training, we can use the trained neural network controller to calculate the total cost for 100 periods with our previously specified sourcing model. The total cost should be significantly lower than the previous one.
+After training, we can use the trained neural network controller to calculate the total cost for 100 periods with our previously specified sourcing model. The total cost should be significantly lower than the cost associated with the untrained model.
 
 .. code-block:: python
     
@@ -80,7 +80,7 @@ After training, we can use the trained neural network controller to calculate th
 Simulation, Plotting and Order Calculation
 ------------------------------------------
 
-We can also inspect how the controller perform in the specified sourcing environment by plotting the inventory and order history, and calculate optimal orders for applications.
+We can also inspect how the controller performs in the specified sourcing environment by (i) plotting the inventory and order histories and (ii) calculating optimal orders.
 
 .. code-block:: python
 
@@ -96,7 +96,7 @@ We can also inspect how the controller perform in the specified sourcing environ
 Save and Load the Model
 -----------------------
 
-It is also a good idea to save the trained neural network controller for future use. This can be done using the `save` method and the `load` method.
+It is also a good idea to save the trained neural network controller for future use. This can be done using the `save` method. The `load` method allows one to load a previously saved model.
 
 .. code-block:: python
 
