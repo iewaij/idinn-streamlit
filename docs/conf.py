@@ -13,8 +13,8 @@ sys.path.insert(0, os.path.abspath("../"))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "idinn"
-copyright = "2024, J. Li, L. Böttcher, T. Asikis, I. Fragkos"
-author = "J. Li, L. Böttcher, T. Asikis, I. Fragkos"
+copyright = "2024, J. Li, T. Asikis, I. Fragkos, L. Böttcher"
+author = "J. Li, T. Asikis, I. Fragkos, L. Böttcher"
 release = "0.1.0"
 
 # -- General configuration ---------------------------------------------------
