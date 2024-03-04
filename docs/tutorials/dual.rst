@@ -6,7 +6,7 @@ Dual-sourcing problems are similar to single-sourcing problems but are more intr
 Initialization
 --------------
 
-To address dual-sourcing problems, we employ two main classes: `DualSourcingModel` and `DualFullyConnectedNeuralController`, responsible for setting up the sourcing model and its corresponding controller. In this tutorial, we adopt a dual sourcing model with specific parameters: regular order lead time and expedited order lead time both set to 0, regular order cost, :math:`c^r`, at 0, expedited order cost, :math:`c^e`, at 20, initial inventory of 6, and a batch size of 256. Additionally, the holding cost, :math:`h`, is 5, while the shortage cost, :math:`s`, is 495. Demand is generated from a uniform distribution with the interval :math:`[0, 5)`. Notice that the `high` parameter is exclusive. Hence, the generated demand never exceeds 4. In our code, the sourcing model is initialized as follows.
+To address dual-sourcing problems, we employ two main classes: `DualSourcingModel` and `DualFullyConnectedNeuralController`, responsible for setting up the sourcing model and its corresponding controller. In this tutorial, we adopt a dual-sourcing model with specific parameters: regular order lead time and expedited order lead time both set to 0, regular order cost, :math:`c^r`, at 0, expedited order cost, :math:`c^e`, at 20, initial inventory of 6, and a batch size of 256. Additionally, the holding cost, :math:`h`, is 5, while the shortage cost, :math:`s`, is 495. Demand is generated from a uniform distribution with the interval :math:`[0, 5)`. Notice that the `high` parameter is exclusive. Hence, the generated demand never exceeds 4. In our code, the sourcing model is initialized as follows.
 
 .. code-block:: python
     
