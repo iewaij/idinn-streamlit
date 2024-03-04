@@ -20,7 +20,7 @@ The package can be installed form the git repository. To do that, run
 
    python -m pip install git+https://gitlab.com/ComputationalScience/inventory-optimization.git@main
 
-Or, if you want to inspect the source code and edit locally, run
+Or, if you want to inspect and locally edit the source code, run
 
 .. code-block::
 
