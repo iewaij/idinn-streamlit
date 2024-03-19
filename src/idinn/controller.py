@@ -3,7 +3,7 @@ import numpy as np
 import torch
 
 
-class NeuralControllerMixIn:
+class NeuralControllerMixIn():
     def save(self, checkpoint_path):
         torch.save(self.state_dict(), checkpoint_path)
 
