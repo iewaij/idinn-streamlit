@@ -1,27 +1,23 @@
 # idinn: Inventory-Dynamics Control with Neural Networks
 
-[<img src="docs/_static/youtube.png" align="center" width="60%" size="auto" alt="youtube">](https://www.youtube.com/watch?v=hUBfTWV6tWQ)
+[<img src="https://gitlab.com/ComputationalScience/idinn/-/raw/main/docs/_static/youtube.png" align="center" width="60%" size="auto" alt="youtube">](https://www.youtube.com/watch?v=hUBfTWV6tWQ)
 
-`idinn` implements **i**nventory **d**ynamics–**i**nformed **n**eural **n**etworks designed for solving both single-sourcing and dual-sourcing problems. Neural network controllers and inventory dynamics are implemented into easily customizable classes to enable users to find the optimal controllers for the user-specified inventory systems.
-
-## Requirements
-
-The basic usage of `idinn` requires working `Python` and `PyTorch` installation. If plotting simulation result of a controller is needed, `matplotlib` should also be installed.
+`idinn` implements **i**nventory **d**ynamics–**i**nformed **n**eural **n**etworks for solving single-sourcing and dual-sourcing problems. Neural network controllers and inventory dynamics are implemented into easily customizable classes to enable users to find the optimal controllers for the user-specified inventory systems.
 
 ## Installation
 
-The package can be installed form the git repository. To do that, run
+The package can be installed form PyPI. To do that, run
 
 ```
-python -m pip install git+https://gitlab.com/ComputationalScience/inventory-optimization.git@main
+pip install idinn
 ```
 
 Or, if you want to inspect the source code and edit locally, run
 
 ```
-git clone https://gitlab.com/ComputationalScience/inventory-optimization.git
-cd inventory-optimization
-python -m pip install -e .
+git clone https://gitlab.com/ComputationalScience/idinn.git
+cd idinn
+pip install -e .
 ```
 
 ## Example Usage

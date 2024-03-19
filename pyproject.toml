@@ -1,0 +1,35 @@
+[project]
+name = "idinn"
+description = "Inventory dynamics–informed neural networks for solving single-sourcing and dual-sourcing problems."
+readme = "README.md"
+requires-python = ">=3.7"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Jiawei Li", email = "sud.concept0x@icloud.com" },
+  { name = "Thomas Asikis", email = "thomas.asikis@uzh.ch" },
+  { name = "Ioannis Fragkos", email = "fragkos@rsm.nl" },
+  { name = "Lucas Boettcher", email = "l.boettcher@fs.de" },
+]
+keywords = ["neural networks", "dynamic control"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+dependencies = ["numpy", "matplotlib", "torch>=2.0"]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+dynamic-programming = ["numba"]
+
+[project.urls]
+Homepage = "https://gitlab.com/ComputationalScience/idinn"
+Documentation = "https://inventory-optimization.readthedocs.io"
+Issues = "https://gitlab.com/ComputationalScience/idinn/-/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/idinn/__init__.py"
