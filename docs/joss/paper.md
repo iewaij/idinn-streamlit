@@ -28,85 +28,234 @@ affiliations:
    index: 3
  - name: Laboratory for Systems Medicine, Department of Medicine, University of Florida
    index: 4
-date: 16 January 2024
+date: 19 April 2024
 bibliography: paper.bib
 
 ---
 
 # Summary
 
-Identifying optimal policies for replenishing inventory from multiple suppliers is a key 
-problem in inventory management. Solving such optimization problems means that one must 
-determine the quantities to order from each supplier based on the current net inventory 
-and outstanding orders, minimizing the expected backlogging, holding, and sourcing costs. 
-Despite over 60 years of extensive research on inventory management problems, even fundamental 
-dual-sourcing problems [@barankin1961delivery,@fukuda1964optimal]—where orders from an 
-expensive supplier arrive faster than orders from a regular supplier—remain analytically 
-intractable. Additionally, there is a growing interest in optimization algorithms that 
-are capable of handling real-world inventory problems with large numbers of 
-suppliers and non-stationary demand.
+Identifying optimal policies for replenishing inventory from multiple suppliers is a key problem in inventory management. Solving such optimization problems means that one must determine the quantities to order from each supplier based on the current net inventory and outstanding orders, minimizing the expected backlogging, holding, and sourcing costs. Despite over 60 years of extensive research on inventory management problems, even fundamental dual-sourcing problems [@barankin1961delivery,@fukuda1964optimal]—where orders from an expensive supplier arrive faster than orders from a regular supplier—remain analytically intractable. Additionally, there is a growing interest in optimization algorithms that are capable of handling real-world inventory problems with large numbers of suppliers and non-stationary demand.
 
-We provide a Python package, `idinn`, implementing inventory dynamics–informed neural 
-networks designed for controlling both single-sourcing and dual-sourcing problems. 
-Neural network controllers and inventory dynamics are implemented in two easily customizable 
-classes, enabling users to control extensions of the provided inventory management 
-systems by tailoring the implementations to their needs. `idinn` also encompasses 
-a dynamic program that computes the optimal solution to dual-sourcing problems. 
+We provide a Python package, `idinn`, implementing inventory dynamics–informed neural networks designed for controlling both single-sourcing and dual-sourcing problems. Neural network controllers and inventory dynamics are implemented into customizable objects with PyTorch backend, to enable users to find the optimal neural controllers for the user-specified inventory systems.
 
 # Statement of need
 
-Inventory management problems commonly arise in almost all industries. A basic and 
-yet analytically intractable problem in inventory management is dual sourcing 
-[@barankin1961delivery,@fukuda1964optimal]. `idinn` is a Python package for controlling 
-dual-sourcing inventory dynamics with dynamics-informed neural networks. 
-Unlike traditional reinforcement-learning approaches, our optimization approach takes 
-into account how the system being optimized behaves over time, leading to more efficient training 
-and accurate solutions. 
+Inventory management problems commonly arise in almost all industries. A basic and yet analytically intractable problem in inventory management is dual sourcing [@barankin1961delivery,@fukuda1964optimal]. `idinn` is a Python package for controlling dual-sourcing inventory dynamics with dynamics-informed neural networks. Unlike traditional reinforcement-learning approaches, our optimization approach takes into account how the system being optimized behaves over time, leading to more efficient training and accurate solutions. 
 
-Training neural networks for inventory-dynamics control presents 
-a specific challenge. The adjustment of neural network weights during training relies 
-on propagating real-valued gradients, whereas the neural network outputs—representing 
-replenishment orders—must be integers. To address this challenge in optimizing a 
-discrete problem with real-valued gradient descent learning algorithms, we employ 
-a problem-tailored straight-through estimator [@yang2022injecting,@asikis2023multi]. 
-This approach enables us to obtain integer-valued neural network outputs while 
-backpropagating real-valued gradients.
+Training neural networks for inventory-dynamics control presents a specific challenge. The adjustment of neural network weights during training relies on propagating real-valued gradients, whereas the neural network outputs—representing replenishment orders—must be integers. To address this challenge in optimizing a discrete problem with real-valued gradient descent learning algorithms, we employ a problem-tailored straight-through estimator [@yang2022injecting,@asikis2023multi]. This approach enables us to obtain integer-valued neural network outputs while backpropagating real-valued gradients.
 
-`idinn` has been developed for researchers and students working at the intersection 
-of optimization, operations research, and machine learning. It has been made available 
-to students in a machine learning course at Frankfurt School to demonstrate 
-the effectiveness of artificial neural networks in solving real-world optimization problems.
-In a previous publication [@bottcher2023control], a less accessible code base was used to
-compute near-optimal solutions of dozens of dual-sourcing instances. 
+`idinn` has been developed for researchers and students working at the intersection of optimization, operations research, and machine learning. It has been made available to students in a machine learning course at Frankfurt School to demonstrate the effectiveness of artificial neural networks in solving real-world optimization problems. In a previous publication [@bottcher2023control], a less accessible code base was used to compute near-optimal solutions of dozens of dual-sourcing instances and benchmark the performance with other single/dual-sourcing solutions including Capped Dual Index (CDI) and dynamic programming. 
 
-# Brief software description
+# Example Usage
 
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
+## Solve Single-Sourcing Problems Using Neural Networks
 
-Double dollars make self-standing equations:
+Single-sourcing problems are inventory management problems where only one delivery option exists. The overall objective in single-sourcing and related inventory management problems is for companies to identify the optimal order quantities to minimize costs given stochastic demand. This problem can be addressed using `idinn`. We first initialize the sourcing model and its associated neural network controller. Subsequently, we train the neural network controller using data generated from the sourcing model. Finally, we can use the trained neural network controller to compute optimal order quantities.
 
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
+### Initialization
 
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
+Since we deal with the single-sourcing problem, we use the `SingleSourcingModel` class to initialize the sourcing model. Let us pick a single sourcing model which has a lead time of 0, i.e. the order arrives immediately after it is placed, an initial inventory of 10 and a batch size of 32. The holding cost, $h$, is 5 and the shortage cost, $s$, is 495. The demand is generated from a uniform distribution with interval $[1, 4]$. Notice that both the `demand_low` and `demand_low` parameter are inclusive (closed bracket). Hence, the generated demand will never exceed 4. In our code, the sourcing model is initialized as follows.
 
-# Figures
+```python
+  import torch
+  from idinn.sourcing_model import SingleSourcingModel
+  from idinn.controller import SingleSourcingNeuralController
 
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
+  single_sourcing_model = SingleSourcingModel(
+    lead_time=0,
+    holding_cost=5,
+    shortage_cost=495,
+    batch_size=32,
+    init_inventory=10,
+    demand_distribuion="uniform",
+    demand_low=1,
+    demand_high=4
+  )
+```
 
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
+The cost at period $t$, $c_t$, is
 
-# Conflicts of interest
+$$
+c_t = h \cdot \max(0, I_t) + s \cdot \max(0, - I_t)\,
+$$
 
-The authors declare that they have no conflicts of interest.
+where $I$t` is the inventory level at period $t$. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The cost can be calculated using the `get_cost` method of the sourcing model.
+
+```python    
+  single_sourcing_model.get_cost()
+```
+
+In our example, this function should return 50 for each sample since the initial inventory is 10 and the holding cost is 5. We have 32 samples in this case, as we specified a batch size of 32.
+
+For single-sourcing problems, we initialize the neural network controller using the `SingleSourcingNeuralController` class. For illustration, we use a simple neural network with 1 hidden layer and 2 neurons. The activation function is `torch.nn.CELU(alpha=1)`. The neural network controller is initialized as follows.
+
+```python
+single_controller = SingleSourcingNeuralController(
+    hidden_layers=[2], activation=torch.nn.CELU(alpha=1)
+)
+```
+
+### Training
+
+Although the neural network controller has not been trained yet, we can still utilize it to calculate the total cost if we apply this controller for 100 periods alongside our previously specified sourcing model.
+
+```python    
+single_controller.get_total_cost(sourcing_model=single_sourcing_model, sourcing_periods=100)
+```
+
+Unsurprisingly, the performance is poor because we are only using the untrained neural network in which the weights are just (pseudo) random numbers. We can train the neural network controller using the `train` method, in which the training data is generated from the given sourcing model. To better monitor the training process, we specify the `tensorboard_writer` parameter to log both the training loss and validation loss. For reproducibility, we also specify the seed of the underlying random number generator using the `seed` parameter.
+
+```python
+from torch.utils.tensorboard import SummaryWriter
+
+single_controller.train(
+    sourcing_model=sourcing_model,
+    sourcing_periods=50,
+    validation_sourcing_periods=1000,
+    epochs=5000,
+    seed=1,
+    tensorboard_writer=SummaryWriter()
+)
+```
+
+After training, we can use the trained neural network controller to calculate the total cost for 100 periods with our previously specified sourcing model. The total cost should be significantly lower than the cost associated with the untrained model.
+
+```python
+single_controller.get_total_cost(sourcing_model=single_sourcing_model, sourcing_periods=100)
+```
+
+### Simulation, Plotting and Order Calculation
+
+We can also inspect how the controller performs in the specified sourcing environment by plotting the inventory and order histories and calculating optimal orders.
+
+```python
+# Simulate and plot the results
+single_controller.plot(sourcing_model=single_sourcing_model, sourcing_periods=100)
+# Calculate the optimal order quantity for applications
+single_controller.forward(current_inventory=10, past_orders=[1, 5])
+```
+
+### Save and Load the Model
+
+It is also a good idea to save the trained neural network controller for future use. This can be done using the `save` method. The `load` method allows the user to load a previously saved controller.
+
+```python
+# Save the model
+single_controller.save("optimal_single_sourcing_controller.pt")
+# Load the model
+single_controller_loaded = SingleSourcingNeuralController(
+    hidden_layers=[2], activation=torch.nn.CELU(alpha=1)
+)
+single_controller_loaded.load("optimal_single_sourcing_controller.pt")
+```
+
+## Solve Dual-Sourcing Problems Using Neural Networks
+
+Dual-sourcing problems are similar to single-sourcing problems but are more intricate. In a dual-sourcing problem, a company has two potential suppliers for a product, each offering varying lead times (the duration for orders to arrive) and order costs (the expense of placing an order). The challenge lies in the company's decision-making process: determining which supplier to engage for each product to minimize costs given stochastic demand. We can solve dual-sourcing problems with `idinn` in a way similar to the solution to single-sourcing problems described in the previous section.
+
+### Initialization
+
+To address dual-sourcing problems, we employ two main classes: `DualSourcingModel` and `DualSourcingNeuralController`, responsible for setting up the sourcing model and its corresponding controller. We adopt a dual-sourcing model with specific parameters: regular order lead time and expedited order lead time both set to 0, regular order cost, $c^r$, at 0, expedited order cost, $c^e$, at 20, initial inventory of 6, and a batch size of 256. Additionally, the holding cost, $h$, is 5, while the shortage cost, $s$, is 495. Demand is generated from a uniform distribution with interval $[0, 4]$. Notice that both the `demand_low` and `demand_low` parameter are inclusive (closed bracket). Hence, the generated demand will never exceed 4. In code, the sourcing model is initialized as follows:
+
+```python    
+import torch
+from idinn.sourcing_model import DualSourcingModel
+from idinn.controller import DualSourcingNeuralController
+
+dual_sourcing_model = DualSourcingModel(
+    regular_lead_time=2,
+    expedited_lead_time=0,
+    regular_order_cost=0,
+    expedited_order_cost=20,
+    holding_cost=5,
+    shortage_cost=495,
+    batch_size=256,
+    init_inventory=6,
+    demand_distribuion="uniform",
+    demand_low=1,
+    demand_high=4
+)
+```
+
+The cost at period `t`, `c_t`, is
+
+$$
+c_t = c^r q^r_t + c^e q^e_t + h \cdot \max(0, I_t) + s \cdot \max(0, - I_t)\,
+$$
+
+where $I_t$ is the inventory level at period $t$, $q^r_t$ is the regular order sent at period $t$, $q^e_t$ is the expedited order sent at period $t$. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The higher the regular or expedited order costs, the more costly it is to send the respective orders. The cost can be calculated using the `get_cost` method of the sourcing model.
+
+```python    
+dual_sourcing_model.get_cost(regular_q=0, expedited_q=0)
+```
+
+In our example, this function should return 30 for each sample since the initial inventory is 6, the holding cost is 5, and there is neither a regular nor expedited order. We have 256 samples in this case, as we specified a batch size of 256.
+
+For dual-sourcing problems, we initialize the neural network controller using the `DualSourcingNeuralController` class. We use a simple neural network with 6 hidden layers and 128, 64, 32, 16, 8, 4 neurons, respectively. The activation function is `torch.nn.CELU(alpha=1)`. The neural network controller is initialized as follows.
+
+```python
+dual_controller = DualSourcingNeuralController(
+    hidden_layers=[128, 64, 32, 16, 8, 4], activation=torch.nn.CELU(alpha=1)
+)
+```
+
+### Training
+
+Although the neural network controller has not been trained yet, we can still utilize it to calculate the total cost if we apply this controller for 100 periods alongside our previously specified sourcing model.
+
+```python
+dual_controller.get_total_cost(sourcing_model=dual_sourcing_model, sourcing_periods=100)
+```
+
+Unsurprisingly, the performance is poor because we are only using the untrained neural network in which the weights are just (pseudo) random numbers. We can train the neural network controller using the `train` method, in which the training data is generated from the given sourcing model. To better monitor the training process, we specify the `tensorboard_writer` parameter to log both the training loss and validation loss. For reproducibility, we also specify the seed of the underlying random number generator using the `seed` parameter.
+
+```python
+from torch.utils.tensorboard import SummaryWriter
+
+dual_controller.train(
+    sourcing_model=dual_sourcing_model,
+    sourcing_periods=100,
+    validation_sourcing_periods=1000,
+    epochs=2000,
+    tensorboard_writer=SummaryWriter("runs/dual_sourcing_model"),
+    seed=4
+)
+```
+
+After training, we can use the trained neural network controller to calculate the total cost for 100 periods with our previously specified sourcing model. The total cost should be significantly lower than the cost associated with the untrained model.
+
+```python    
+dual_controller.get_total_cost(sourcing_model=dual_sourcing_model, sourcing_periods=100)
+```
+
+### Simulation, Plotting and Order Calculation
+
+We can also inspect how the controller performs in the specified sourcing environment by plotting the inventory and order histories, and calculating optimal orders.
+
+```python
+# Simulate and plot the results
+dual_controller.plot(sourcing_model=dual_sourcing_model, sourcing_periods=100)
+# Calculate the optimal order quantity for applications
+regular_q, expedited_q = dual_controller.forward(
+    current_inventory=10,
+    past_regular_orders=[1, 5],
+    past_expedited_orders=[0, 0],
+)
+```
+
+### Save and Load the Model
+
+It is also a good idea to save the trained neural network controller for future use. This can be done using the `save` method. The `load` method allows one to load a previously saved model.
+
+```python
+# Save the model
+dual_controller.save("optimal_dual_sourcing_controller.pt")
+# Load the model
+dual_controller_loaded = DualSourcingNeuralController(
+    hidden_layers=[128, 64, 32, 16, 8, 4], activation=torch.nn.CELU(alpha=1)
+)
+dual_controller_loaded.load("optimal_dual_sourcing_controller.pt")
+```
 
 # References
