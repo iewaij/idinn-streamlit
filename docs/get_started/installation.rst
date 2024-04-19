@@ -2,9 +2,6 @@
 Installation
 ************
 
-Install `idinn`
-===============
-
 Requirements
 ============
 

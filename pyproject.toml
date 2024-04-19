@@ -19,9 +19,6 @@ classifiers = [
 dependencies = ["numpy", "matplotlib", "torch>=2.0"]
 dynamic = ["version"]
 
-[project.optional-dependencies]
-dynamic-programming = ["numba"]
-
 [project.urls]
 Homepage = "https://gitlab.com/ComputationalScience/idinn"
 Documentation = "https://inventory-optimization.readthedocs.io"
