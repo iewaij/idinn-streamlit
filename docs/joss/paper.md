@@ -42,15 +42,15 @@ We provide a Python package, `idinn`, implementing inventory dynamics–informed
 
 # Statement of need
 
-Inventory management problems commonly arise in almost all industries. A basic and yet analytically intractable problem in inventory management is dual sourcing [@barankin1961delivery,@fukuda1964optimal]. `idinn` is a Python package for controlling dual-sourcing inventory dynamics with dynamics-informed neural networks. Unlike traditional reinforcement-learning approaches, our optimization approach takes into account how the system being optimized behaves over time, leading to more efficient training and accurate solutions. 
+Inventory management problems arise in almost all industries. A basic and yet analytically intractable problem in inventory management is dual sourcing [@barankin1961delivery,@fukuda1964optimal]. `idinn` is a Python package for controlling dual-sourcing inventory dynamics with dynamics-informed neural networks. Unlike traditional reinforcement-learning approaches, our optimization approach takes into account how the system being optimized behaves over time, leading to more efficient training and accurate solutions. 
 
 Training neural networks for inventory-dynamics control presents a specific challenge. The adjustment of neural network weights during training relies on propagating real-valued gradients, whereas the neural network outputs—representing replenishment orders—must be integers. To address this challenge in optimizing a discrete problem with real-valued gradient descent learning algorithms, we employ a problem-tailored straight-through estimator [@yang2022injecting,@asikis2023multi]. This approach enables us to obtain integer-valued neural network outputs while backpropagating real-valued gradients.
 
-`idinn` has been developed for researchers and students working at the intersection of optimization, operations research, and machine learning. It has been made available to students in a machine learning course at Frankfurt School to demonstrate the effectiveness of artificial neural networks in solving real-world optimization problems. In a previous publication [@bottcher2023control], a less accessible code base was used to compute near-optimal solutions of dozens of dual-sourcing instances and benchmark the performance with other single/dual-sourcing solutions including Capped Dual Index (CDI) and dynamic programming. 
+`idinn` has been developed for researchers and students working at the intersection of optimization, operations research, and machine learning. It has been made available to students in a machine learning course at Frankfurt School to demonstrate the effectiveness of artificial neural networks in solving real-world optimization problems. In a previous publication [@bottcher2023control], a less accessible code base has been used to compute near-optimal solutions of dozens of dual-sourcing instances.
 
-# Example Usage
+# Example usage
 
-## Solve Single-Sourcing Problems Using Neural Networks
+## Solve single-sourcing problems using neural networks
 
 Single-sourcing problems are inventory management problems where only one delivery option exists. The overall objective in single-sourcing and related inventory management problems is for companies to identify the optimal order quantities to minimize costs given stochastic demand. This problem can be addressed using `idinn`. We first initialize the sourcing model and its associated neural network controller. Subsequently, we train the neural network controller using data generated from the sourcing model. Finally, we can use the trained neural network controller to compute optimal order quantities.
 
@@ -126,7 +126,7 @@ After training, we can use the trained neural network controller to calculate th
 single_controller.get_total_cost(sourcing_model=single_sourcing_model, sourcing_periods=100)
 ```
 
-### Simulation, Plotting and Order Calculation
+### Simulation, plotting, and order calculation
 
 We can also inspect how the controller performs in the specified sourcing environment by plotting the inventory and order histories and calculating optimal orders.
 
@@ -137,7 +137,7 @@ single_controller.plot(sourcing_model=single_sourcing_model, sourcing_periods=10
 single_controller.forward(current_inventory=10, past_orders=[1, 5])
 ```
 
-### Save and Load the Model
+### Save and load the model
 
 It is also a good idea to save the trained neural network controller for future use. This can be done using the `save` method. The `load` method allows the user to load a previously saved controller.
 
@@ -151,7 +151,7 @@ single_controller_loaded = SingleSourcingNeuralController(
 single_controller_loaded.load("optimal_single_sourcing_controller.pt")
 ```
 
-## Solve Dual-Sourcing Problems Using Neural Networks
+## Solve dual-sourcing problems using neural networks
 
 Dual-sourcing problems are similar to single-sourcing problems but are more intricate. In a dual-sourcing problem, a company has two potential suppliers for a product, each offering varying lead times (the duration for orders to arrive) and order costs (the expense of placing an order). The challenge lies in the company's decision-making process: determining which supplier to engage for each product to minimize costs given stochastic demand. We can solve dual-sourcing problems with `idinn` in a way similar to the solution to single-sourcing problems described in the previous section.
 
@@ -230,7 +230,7 @@ After training, we can use the trained neural network controller to calculate th
 dual_controller.get_total_cost(sourcing_model=dual_sourcing_model, sourcing_periods=100)
 ```
 
-### Simulation, Plotting and Order Calculation
+### Simulation, plotting, and order calculation
 
 We can also inspect how the controller performs in the specified sourcing environment by plotting the inventory and order histories, and calculating optimal orders.
 
@@ -245,7 +245,7 @@ regular_q, expedited_q = dual_controller.forward(
 )
 ```
 
-### Save and Load the Model
+### Save and load the model
 
 It is also a good idea to save the trained neural network controller for future use. This can be done using the `save` method. The `load` method allows one to load a previously saved model.
 
