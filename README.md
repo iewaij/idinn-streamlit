@@ -34,7 +34,7 @@ sourcing_model = SingleSourcingModel(
     shortage_cost=495,
     batch_size=32,
     init_inventory=10,
-    demand_distribuion="uniform",
+    demand_distribution="uniform",
     demand_low=1,
     demand_high=4
 )
