@@ -14,7 +14,7 @@ class BaseSourcingModel:
         regular_order_cost=None,
         expedited_order_cost=None,
         demand=None,
-        demand_distribuion="uniform",
+        demand_distribution="uniform",
         demand_low=1,
         demand_high=4,
     ):
@@ -32,8 +32,8 @@ class BaseSourcingModel:
 
         if demand is not None:
             self.demand_iterator = iter(demand)
-        elif demand_distribuion is not None:
-            if demand_distribuion == "uniform":
+        elif demand_distribution is not None:
+            if demand_distribution == "uniform":
                 self.demand_iterator = torch.distributions.Uniform(
                     low=demand_low, high=demand_high + 1
                 )
@@ -122,7 +122,7 @@ class SingleSourcingModel(BaseSourcingModel):
         init_inventory,
         batch_size=1,
         demand=None,
-        demand_distribuion="uniform",
+        demand_distribution="uniform",
         demand_low=1,
         demand_high=4,
     ):
@@ -141,7 +141,7 @@ class SingleSourcingModel(BaseSourcingModel):
             The batch size for orders. default is 1.
         demand : Iterable, torch.Tensor, np.array, or pd.Series, optional
             The array for outputting values of demands.
-        demand_distribuion : str, default is `uniform`.
+        demand_distribution : str, default is `uniform`.
             Distribution for generated demands when `demand` is not specified.
         demand_low : int, default is 1.
             Lower inclusive bound for generated demands when `demand` is not specified.
@@ -155,7 +155,7 @@ class SingleSourcingModel(BaseSourcingModel):
             init_inventory=init_inventory,
             batch_size=batch_size,
             demand=demand,
-            demand_distribuion=demand_distribuion,
+            demand_distribution=demand_distribution,
             demand_low=demand_low,
             demand_high=demand_high,
         )
@@ -213,7 +213,7 @@ class DualSourcingModel(BaseSourcingModel):
         init_inventory,
         batch_size=1,
         demand=None,
-        demand_distribuion="uniform",
+        demand_distribution="uniform",
         demand_low=1,
         demand_high=4,
     ):
@@ -238,7 +238,7 @@ class DualSourcingModel(BaseSourcingModel):
             The batch size for orders.
         demand : Iterable, torch.Tensor, np.array, or pd.Series, optional
             The array for outputting values of demands.
-        demand_distribuion : str, default is `uniform`.
+        demand_distribution : str, default is `uniform`.
             Distribution for generated demand when `demand` is not specified.
         demand_low : int, default is 1.
             Lower bound for generated demand when `demand` is not specified.
@@ -255,7 +255,7 @@ class DualSourcingModel(BaseSourcingModel):
             init_inventory=init_inventory,
             batch_size=batch_size,
             demand=demand,
-            demand_distribuion=demand_distribuion,
+            demand_distribution=demand_distribution,
             demand_low=demand_low,
             demand_high=demand_high,
         )
