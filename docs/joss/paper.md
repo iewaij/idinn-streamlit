@@ -2,6 +2,7 @@
 title: 'idinn: A Python Package for Inventory-Dynamics Control with Neural Networks'
 tags:
   - Python
+  - PyTorch
   - artificial neural networks
   - inventory dynamics
   - optimization
@@ -257,5 +258,10 @@ dual_controller_loaded = DualSourcingNeuralController(
 )
 dual_controller_loaded.load("optimal_dual_sourcing_controller.pt")
 ```
+
+# Acknowledgements
+
+LB acknowledges financial support from hessian.AI and the Army Research Office (grant W911NF-23-1-0129). TA acknowledges financial support from the Schweizerischer Nationalfonds zur Förderung der Wissenschaf­tlichen Forschung (NCCR Automation) (grant P2EZP2 191888).
+
 
 # References
