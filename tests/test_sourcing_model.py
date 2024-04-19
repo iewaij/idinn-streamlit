@@ -78,7 +78,7 @@ def single_sourcing_model_fixed_demand():
         shortage_cost=1,
         init_inventory=10,
         batch_size=3,
-        demand_generator=torch.distributions.Uniform(low=1, high=2),
+        demand=[1, 1, 1, 1, 1],
     )
 
 
@@ -236,7 +236,7 @@ def dual_sourcing_model_fixed_demand():
         shortage_cost=1,
         init_inventory=10,
         batch_size=3,
-        demand_generator=torch.distributions.Uniform(low=1, high=2),
+        demand=[1, 1, 1, 1, 1],
     )
 
 

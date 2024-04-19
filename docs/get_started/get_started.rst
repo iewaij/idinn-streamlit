@@ -17,16 +17,19 @@ The basic usage of `idinn` starts with a sourcing model and a controller. First,
       holding_cost=5,
       shortage_cost=495,
       batch_size=32,
-      init_inventory=10
+      init_inventory=10,
+      demand_distribuion="uniform",
+      demand_low=1,
+      demand_high=4
    )
 
-Afterwards, initialize a controller that is compatible with the chosen sourcing model. In the above single-sourcing example, the relevant controller is :class:`SingleFullyConnectedNeuralController`.
+Afterwards, initialize a controller that is compatible with the chosen sourcing model. In the above single-sourcing example, the relevant controller is :class:`SingleSourcingNeuralController`.
 
 .. code-block:: python
 
-    from idinn.controller import SingleFullyConnectedNeuralController
+    from idinn.controller import SingleSourcingNeuralController
     # Initialize the neural controller
-    controller = SingleFullyConnectedNeuralController()
+    controller = SingleSourcingNeuralController()
 
 Training
 --------
@@ -58,7 +61,4 @@ The trained controller can be used for optimal order quantity calculations.
 .. code-block:: python
 
    # Calculate the optimal order quantity for applications
-   controller.forward(
-      current_inventory=torch.tensor([[10]]),
-      past_orders=torch.tensor([[1, 5]]),
-   )
+   controller.forward(current_inventory=10, past_orders=[1, 5])
