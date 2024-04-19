@@ -80,7 +80,7 @@ $$
 c_t = h \cdot \max(0, I_t) + s \cdot \max(0, - I_t)\,
 $$
 
-where $I$t` is the inventory level at period $t$. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The cost can be calculated using the `get_cost` method of the sourcing model.
+where $I_t$ is the inventory level at period $t$. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The cost can be calculated using the `get_cost` method of the sourcing model.
 
 ```python    
   single_sourcing_model.get_cost()
