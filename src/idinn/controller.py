@@ -17,10 +17,10 @@ class SingleSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
 
     Parameters
     ----------
-    hidden_layers : list
-        List of integers representing the number of units in each hidden layer. Default is [2].
-    activation : torch.nn.Module
-        Activation function to be used in the hidden layers. Default is torch.nn.CELU(alpha=1).
+    hidden_layers : list, default is [2]
+        List of integers representing the number of units in each hidden layer.
+    activation : torch.nn.Module, default is torch.nn.CELU(alpha=1)
+        Activation function to be used in the hidden layers.
 
     Attributes
     ----------
@@ -34,17 +34,17 @@ class SingleSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
     Methods
     -------
     init_layers(lead_time)
-        Initializes the layers of the neural network based on the lead time.
+        Initialize the layers of the neural network based on the lead time.
     forward(current_inventory, past_orders)
-        Performs forward pass through the neural network.
+        Perform forward pass through the neural network.
     get_total_cost(sourcing_model, sourcing_periods, seed=None)
-        Calculates the total cost over a given number of sourcing periods.
+        Calculate the total cost over a given number of sourcing periods.
     train(sourcing_model, sourcing_periods, epochs, ...)
-        Trains the neural network controller using the sourcing model and specified parameters.
+        Train the neural network controller using the sourcing model and specified parameters.
     simulate(sourcing_model, sourcing_periods)
-        Simulates the inventory and order quantities over a given number of sourcing periods.
+        Simulate the inventory and order quantities over a given number of sourcing periods.
     plot(sourcing_model, sourcing_periods)
-        Plots the inventory and order quantities over a given number of sourcing periods.
+        Plot the inventory and order quantities over a given number of sourcing periods.
     """
 
     def __init__(self, hidden_layers=[2], activation=torch.nn.CELU(alpha=1)):
@@ -56,7 +56,7 @@ class SingleSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
 
     def init_layers(self, lead_time):
         """
-        Initializes the layers of the neural network based on the lead time.
+        Initialize the layers of the neural network based on the lead time.
 
         Parameters
         ----------
@@ -90,31 +90,33 @@ class SingleSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
         past_orders,
     ):
         """
-        Performs forward pass through the neural network.
+        Perform forward pass through the neural network.
 
         Parameters
         ----------
-        current_inventory : torch.Tensor
+        current_inventory : int, or torch.Tensor
             Current inventory levels.
-        past_orders : torch.Tensor
+        past_orders : int, or torch.Tensor
             Past order quantities.
 
         Returns
         -------
         torch.Tensor
-            Predicted order quantities.
+            Order quanty calculated by the neural network.
         """
+        if not isinstance(current_inventory, torch.Tensor):
+            current_inventory = torch.tensor([[current_inventory]], dtype=torch.float32)
+        if not isinstance(past_orders, torch.Tensor):
+            past_orders = torch.tensor([past_orders], dtype=torch.float32)
         if self.lead_time > 0:
             h = torch.cat([current_inventory, past_orders[:, -self.lead_time :]], dim=1)
-        else:
-            h = current_inventory
         h = self.stack(h)
         q = h - torch.frac(h).clone().detach()
         return q
 
     def get_total_cost(self, sourcing_model, sourcing_periods, seed=None):
         """
-        Calculates the total cost over a given number of sourcing periods.
+        Calculate the total cost over a given number of sourcing periods.
 
         Parameters
         ----------
@@ -123,7 +125,7 @@ class SingleSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
         sourcing_periods : int
             The number of sourcing periods.
         seed : int, optional
-            Random seed for reproducibility. Default is None.
+            Random seed for reproducibility.
 
         Returns
         -------
@@ -158,7 +160,7 @@ class SingleSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
         tensorboard_writer=None,
     ):
         """
-        Trains the neural network controller using the sourcing model and specified parameters.
+        Train the neural network controller using the sourcing model and specified parameters.
 
         Parameters
         ----------
@@ -169,19 +171,15 @@ class SingleSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
         epochs : int
             The number of training epochs.
         validation_sourcing_periods : int, optional
-            The number of sourcing periods for validation. Default is None.
-        lr_init_inventory : float, optional
-            Learning rate for initializing inventory. Default is 1e-1.
-        lr_parameters : float, optional
-            Learning rate for updating neural network parameters. Default is 3e-3.
+            The number of sourcing periods for validation.
+        lr_init_inventory : float, default is 1e-1
+            Learning rate for initial inventory.
+        lr_parameters : float, default is 3e-3
+            Learning rate for updating neural network parameters. 
         seed : int, optional
-            Random seed for reproducibility. Default is None.
+            Random seed for reproducibility.
         tensorboard_writer : tensorboard.SummaryWriter, optional
-            Tensorboard writer for logging. Default is None.
-
-        Returns
-        -------
-        None
+            Tensorboard writer for logging.
         """
         if seed is not None:
             torch.manual_seed(seed)
@@ -238,16 +236,16 @@ class SingleSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
 
     def simulate(self, sourcing_model, sourcing_periods, seed=None):
         """
-        Simulates the inventory and order quantities over a given number of sourcing periods.
+        Simulate the inventory and order quantities over a given number of sourcing periods.
 
         Parameters
         ----------
-        sourcing_model : SourcingModel
+        sourcing_model : SingleSourcingModel
             The sourcing model to be used for simulation.
         sourcing_periods : int
             The number of sourcing periods for simulation.
         seed : int, optional
-            Random seed for reproducibility. Default is None.
+            Random seed for reproducibility.
 
         Returns
         -------
@@ -268,18 +266,14 @@ class SingleSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
 
     def plot(self, sourcing_model, sourcing_periods):
         """
-        Plots the inventory and order quantities over a given number of sourcing periods.
+        Plot the inventory and order quantities over a given number of sourcing periods.
 
         Parameters
         ----------
-        sourcing_model : SourcingModel
+        sourcing_model : SingleSourcingModel
             The sourcing model to be used for plotting.
         sourcing_periods : int
             The number of sourcing periods for plotting.
-
-        Returns
-        -------
-        None
         """
         past_inventories, past_orders = self.simulate(
             sourcing_model=sourcing_model, sourcing_periods=sourcing_periods
@@ -305,11 +299,11 @@ class DualSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
 
     Parameters
     ----------
-    hidden_layers : list
+    hidden_layers : list, default is [128, 64, 32, 16, 8, 4]
         List of integers specifying the sizes of hidden layers.
-    activation : torch.nn.Module
+    activation : torch.nn.Module, default is torch.nn.CELU(alpha=1)
         Activation function to be used in the hidden layers.
-    compressed : bool
+    compressed : bool, default is False
         Flag indicating whether the input is compressed.
 
     Attributes
@@ -335,8 +329,8 @@ class DualSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
         Forward pass of the neural network.
     get_total_cost(sourcing_model, sourcing_periods, seed=None)
         Calculate the total cost of the sourcing model.
-    train(sourcing_model, sourcing_periods, epochs, validation_sourcing_periods=None, lr_init_inventory=1e-1, lr_parameters=3e-3, seed=None, tensorboard_writer=None)
-        Train the neural network.
+    train(sourcing_model, sourcing_periods, epochs, ...)
+        Trains the neural network controller using the sourcing model and specified parameters.
     simulate(sourcing_model, sourcing_periods, seed=None)
         Simulate the sourcing model using the neural network.
     plot(sourcing_model, sourcing_periods)
@@ -366,10 +360,6 @@ class DualSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
             Regular lead time.
         expedited_lead_time : int
             Expedited lead time.
-
-        Returns
-        -------
-        None
         """
         self.regular_lead_time = regular_lead_time
         self.expedited_lead_time = expedited_lead_time
@@ -400,11 +390,11 @@ class DualSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
 
         Parameters
         ----------
-        current_inventory : torch.Tensor
+        current_inventory : int, or torch.Tensor
             Current inventory.
-        past_regular_orders : torch.Tensor
+        past_regular_orders : int, or torch.Tensor
             Past regular orders.
-        past_expedited_orders : torch.Tensor
+        past_expedited_orders : int, or torch.Tensor
             Past expedited orders.
 
         Returns
@@ -414,6 +404,13 @@ class DualSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
         expedited_q : torch.Tensor
             Expedited order quantity.
         """
+        if not isinstance(current_inventory, torch.Tensor):
+            current_inventory = torch.tensor([[current_inventory]], dtype=torch.float32)
+        if not isinstance(past_regular_orders, torch.Tensor):
+            past_regular_orders = torch.tensor([past_regular_orders], dtype=torch.float32)
+        if not isinstance(past_expedited_orders, torch.Tensor):
+            past_expedited_orders = torch.tensor([past_expedited_orders], dtype=torch.float32)
+
         if self.regular_lead_time > 0:
             if self.compressed:
                 inputs = past_regular_orders[:, -self.regular_lead_time :]
@@ -444,8 +441,8 @@ class DualSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
 
         Parameters
         ----------
-        sourcing_model : Sourcing model.
-            Sourcing model.
+        sourcing_model : DualSourcingModel
+            The sourcing model.
         sourcing_periods : int
             Number of sourcing periods.
         seed : int, optional
@@ -494,18 +491,18 @@ class DualSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
 
         Parameters
         ----------
-        sourcing_model : Sourcing model
-            Sourcing model.
+        sourcing_model : DualSourcingModel
+            The sourcing model.
         sourcing_periods : int
             Number of sourcing periods.
         epochs : int
             Number of training epochs.
         validation_sourcing_periods : int, optional
             Number of sourcing periods for validation.
-        lr_init_inventory : float, optional
-            Learning rate for initializing inventory.
-        lr_parameters : float, optional
-            Learning rate for neural network parameters.
+        lr_init_inventory : float, default is 1e-1
+            Learning rate for initial inventory.
+        lr_parameters : float, default is 3e-3
+            Learning rate for updating neural network parameters.
         seed : int, optional
             Random seed for reproducibility.
         tensorboard_writer : TensorBoard writer, optional
@@ -566,7 +563,7 @@ class DualSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
 
         Parameters
         ----------
-        sourcing_model : Sourcing model
+        sourcing_model : DualSourcingModel
             The sourcing model.
         sourcing_periods : int
             Number of sourcing periods.
@@ -609,15 +606,10 @@ class DualSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
 
         Parameters
         ----------
-        sourcing_model : Sourcing model
+        sourcing_model : DualSourcingModel
             The sourcing model.
         sourcing_periods : int
             Number of sourcing periods.
-
-        Returns
-        -------
-        None
-
         """
         past_inventories, past_regular_orders, past_expedited_orders = self.simulate(
             sourcing_model=sourcing_model, sourcing_periods=sourcing_periods

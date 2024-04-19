@@ -6,13 +6,13 @@ Single-sourcing problems are inventory management problems where only one delive
 Initialization
 --------------
 
-Since we deal with the single-sourcing problem, we use the `SingleSourcingModel` class to initialize the sourcing model. In this tutorial, let us pick a single sourcing model which has a lead time of 0, i.e. the order arrives immediately after it is placed, an initial inventory of 10 and a batch size of 32. The holding cost, :math:`h`, is 5 and the shortage cost, :math:`s`, is 495. The demand is generated from a uniform distribution with interval :math:`[0, 5)`. Notice that the `high` parameter is exclusive (open bracket). Hence, the generated demand will never exceed 4. In our code, the sourcing model is initialized as follows.
+Since we deal with the single-sourcing problem, we use the `SingleSourcingModel` class to initialize the sourcing model. In this tutorial, let us pick a single sourcing model which has a lead time of 0, i.e. the order arrives immediately after it is placed, an initial inventory of 10 and a batch size of 32. The holding cost, :math:`h`, is 5 and the shortage cost, :math:`s`, is 495. The demand is generated from a uniform distribution with interval :math:`[0, 4]`. Notice that both the `demand_low` and `demand_low` parameter are inclusive (closed bracket). Hence, the generated demand will never exceed 4. In our code, the sourcing model is initialized as follows.
 
 .. code-block:: python
     
    import torch
    from idinn.sourcing_model import SingleSourcingModel
-   from idinn.controller import SingleFullyConnectedNeuralController
+   from idinn.controller import SingleSourcingNeuralController
 
    single_sourcing_model = SingleSourcingModel(
       lead_time=0,
@@ -20,7 +20,9 @@ Since we deal with the single-sourcing problem, we use the `SingleSourcingModel`
       shortage_cost=495,
       batch_size=32,
       init_inventory=10,
-      demand_generator=torch.distributions.Uniform(low=0, high=5)
+      demand_distribuion="uniform",
+      demand_low=1,
+      demand_high=4
    )
 
 The cost at period :math:`t`, :math:`c_t`, is
@@ -37,11 +39,11 @@ where :math:`I_t` is the inventory level at period :math:`t`. The higher the hol
 
 In our example, this function should return 50 for each sample since the initial inventory is 10 and the holding cost is 5. We have 32 samples in this case, as we specified a batch size of 32.
 
-For single-sourcing problems, we initialize the neural network controller using the `SingleFullyConnectedNeuralController` class. In this tutorial, we use a simple neural network with 1 hidden layer and 2 neurons. The activation function is `torch.nn.CELU(alpha=1)`. The neural network controller is initialized as follows.
+For single-sourcing problems, we initialize the neural network controller using the `SingleSourcingNeuralController` class. In this tutorial, we use a simple neural network with 1 hidden layer and 2 neurons. The activation function is `torch.nn.CELU(alpha=1)`. The neural network controller is initialized as follows.
 
 .. code-block:: python
 
-    single_controller = SingleFullyConnectedNeuralController(
+    single_controller = SingleSourcingNeuralController(
         hidden_layers=[2], activation=torch.nn.CELU(alpha=1)
     )
 
@@ -85,22 +87,19 @@ We can also inspect how the controller performs in the specified sourcing enviro
     # Simulate and plot the results
     single_controller.plot(sourcing_model=single_sourcing_model, sourcing_periods=100)
     # Calculate the optimal order quantity for applications
-    single_controller.forward(
-        current_inventory=torch.tensor([[10]]),
-        past_orders=torch.tensor([[1, 5]]),
-    )
+    single_controller.forward(current_inventory=10, past_orders=[1, 5])
 
 Save and Load the Model
 -----------------------
 
-It is also a good idea to save the trained neural network controller for future use. This can be done using the `save` method. The `load` method allows one to load a previously saved model.
+It is also a good idea to save the trained neural network controller for future use. This can be done using the `save` method. The `load` method allows one to load a previously saved controller.
 
 .. code-block:: python
 
     # Save the model
     single_controller.save("optimal_single_sourcing_controller.pt")
     # Load the model
-    single_controller_loaded = SingleFullyConnectedNeuralController(
+    single_controller_loaded = SingleSourcingNeuralController(
         hidden_layers=[2], activation=torch.nn.CELU(alpha=1)
     )
     single_controller_loaded.load("optimal_single_sourcing_controller.pt")

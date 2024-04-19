@@ -162,3 +162,9 @@ cython_debug/
 # VS Code and macOS
 .vscode
 .DS_Store
+
+# Jupyter notebooks
+*.ipynb
+
+# PyTorch checkpoints
+*.pt

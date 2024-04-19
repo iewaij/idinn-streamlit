@@ -6,13 +6,13 @@ Dual-sourcing problems are similar to single-sourcing problems but are more intr
 Initialization
 --------------
 
-To address dual-sourcing problems, we employ two main classes: `DualSourcingModel` and `DualFullyConnectedNeuralController`, responsible for setting up the sourcing model and its corresponding controller. In this tutorial, we adopt a dual-sourcing model with specific parameters: regular order lead time and expedited order lead time both set to 0, regular order cost, :math:`c^r`, at 0, expedited order cost, :math:`c^e`, at 20, initial inventory of 6, and a batch size of 256. Additionally, the holding cost, :math:`h`, is 5, while the shortage cost, :math:`s`, is 495. Demand is generated from a uniform distribution with the interval :math:`[0, 5)`. Notice that the `high` parameter is exclusive. Hence, the generated demand never exceeds 4. In our code, the sourcing model is initialized as follows.
+To address dual-sourcing problems, we employ two main classes: `DualSourcingModel` and `DualSourcingNeuralController`, responsible for setting up the sourcing model and its corresponding controller. In this tutorial, we adopt a dual-sourcing model with specific parameters: regular order lead time and expedited order lead time both set to 0, regular order cost, :math:`c^r`, at 0, expedited order cost, :math:`c^e`, at 20, initial inventory of 6, and a batch size of 256. Additionally, the holding cost, :math:`h`, is 5, while the shortage cost, :math:`s`, is 495. Demand is generated from a uniform distribution with interval :math:`[0, 4]`. Notice that both the `demand_low` and `demand_low` parameter are inclusive (closed bracket). Hence, the generated demand will never exceed 4. In our code, the sourcing model is initialized as follows.
 
 .. code-block:: python
     
    import torch
    from idinn.sourcing_model import DualSourcingModel
-   from idinn.controller import DualFullyConnectedNeuralController
+   from idinn.controller import DualSourcingNeuralController
 
     dual_sourcing_model = DualSourcingModel(
         regular_lead_time=2,
@@ -23,6 +23,9 @@ To address dual-sourcing problems, we employ two main classes: `DualSourcingMode
         shortage_cost=495,
         batch_size=256,
         init_inventory=6,
+        demand_distribuion="uniform",
+        demand_low=1,
+        demand_high=4
     )
 
 The cost at period :math:`t`, :math:`c_t`, is
@@ -39,11 +42,11 @@ where :math:`I_t` is the inventory level at period :math:`t`, :math:`q^r_t` is t
 
 In our example, this function should return 30 for each sample since the initial inventory is 6, the holding cost is 5, and there is neither a regular nor expedited order. We have 256 samples in this case, as we specified a batch size of 256.
 
-For dual-sourcing problems, we initialize the neural network controller using the `DualFullyConnectedNeuralController` class. In this tutorial, we use a simple neural network with 6 hidden layers and 128, 64, 32, 16, 8, 4 neurons, respectively. The activation function is `torch.nn.CELU(alpha=1)`. The neural network controller is initialized as follows.
+For dual-sourcing problems, we initialize the neural network controller using the `DualSourcingNeuralController` class. In this tutorial, we use a simple neural network with 6 hidden layers and 128, 64, 32, 16, 8, 4 neurons, respectively. The activation function is `torch.nn.CELU(alpha=1)`. The neural network controller is initialized as follows.
 
 .. code-block:: python
 
-    dual_controller = SingleFullyConnectedNeuralController(
+    dual_controller = DualSourcingNeuralController(
         hidden_layers=[128, 64, 32, 16, 8, 4], activation=torch.nn.CELU(alpha=1)
     )
 
@@ -88,9 +91,9 @@ We can also inspect how the controller performs in the specified sourcing enviro
     dual_controller.plot(sourcing_model=dual_sourcing_model, sourcing_periods=100)
     # Calculate the optimal order quantity for applications
     regular_q, expedited_q = dual_controller.forward(
-        current_inventory=torch.tensor([[10]]),
-        past_regular_orders=torch.tensor([[1, 5]]),
-        past_expedited_orders=torch.tensor([[0, 0]]),
+        current_inventory=10,
+        past_regular_orders=[1, 5],
+        past_expedited_orders=[0, 0],
     )
 
 Save and Load the Model
@@ -103,4 +106,5 @@ It is also a good idea to save the trained neural network controller for future 
     # Save the model
     dual_controller.save("optimal_dual_sourcing_controller.pt")
     # Load the model
-    dual_controller_loaded = DualFullyConnectedNeuralController().load("optimal_dual_sourcing_controller.pt")
+    dual_controller_loaded = DualSourcingNeuralController()
+    dual_controller_loaded.load("optimal_dual_sourcing_controller.pt")

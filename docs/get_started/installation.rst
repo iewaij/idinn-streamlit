@@ -17,7 +17,7 @@ The basic usage of `idinn` requires a working `Python`_ and `PyTorch`_ installat
 Install `idinn`
 ===============
 
-The package can be installed form the git repository. To do that, run
+The package can be installed form PyPI. To do that, run
 
 .. code-block::
 
