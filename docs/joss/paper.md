@@ -207,13 +207,13 @@ dual_controller = DualSourcingNeuralController(
 
 ### Training
 
-Although the neural network controller has not been trained yet, we can still compute the total cost associated with its order policy. To do so, we integrate it with our previously specified sourcing model and run simulations for 100 periods.
+As for the single-sourcing model, we can evaluate the performance of an untrained dual-sourcing controller by integrating it with our previously specified dual-sourcing model and running simulations for 100 periods.
 
 ```python
 dual_controller.get_total_cost(sourcing_model=dual_sourcing_model, sourcing_periods=100)
 ```
 
-Unsurprisingly, the performance is poor because we are only using the untrained neural network in which the weights are just (pseudo) random numbers. We can train the neural network controller using the `train` method, in which the training data is generated from the given sourcing model. To better monitor the training process, we specify the `tensorboard_writer` parameter to log both the training loss and validation loss. For reproducibility, we also specify the seed of the underlying random number generator using the `seed` parameter.
+To improve the initially poor performance, we can train the neural network controller using the `train` method.
 
 ```python
 from torch.utils.tensorboard import SummaryWriter
@@ -228,7 +228,7 @@ dual_controller.train(
 )
 ```
 
-After training, we can use the trained neural network controller to calculate the total cost for 100 periods with our previously specified sourcing model. The total cost should be significantly lower than the cost associated with the untrained model.
+The total cost of the trained controller over 100 periods can be computed as follows.
 
 ```python    
 dual_controller.get_total_cost(sourcing_model=dual_sourcing_model, sourcing_periods=100)
