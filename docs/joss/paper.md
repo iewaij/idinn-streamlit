@@ -193,7 +193,7 @@ dual_sourcing_model.get_cost(regular_q=0, expedited_q=0)
 
 In our example, this function should return 30 for each sample since the initial inventory is 6, the holding cost is 5, and there is neither a regular nor expedited order. We have 256 samples in this case, as we specified a batch size of 256.
 
-For dual-sourcing problems, we initialize the neural network controller using the `DualSourcingNeuralController` class. We use a simple neural network with 6 hidden layers and 128, 64, 32, 16, 8, 4 neurons, respectively. The activation function is `torch.nn.CELU(alpha=1)`. The neural network controller is initialized as follows.
+For dual-sourcing problems, we initialize the neural network controller using the `DualSourcingNeuralController` class. We use a simple neural network with 6 hidden layers. The numbers of neurons in each layer are 128, 64, 32, 16, 8, and 4, respectively. The activation function is `torch.nn.CELU(alpha=1)`. The neural network controller is initialized as follows.
 
 ```python
 dual_controller = DualSourcingNeuralController(
