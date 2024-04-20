@@ -32,7 +32,7 @@ The cost at period :math:`t`, :math:`c_t`, is
 
 .. math::
 
-   c_t = c^r q^r_t + c^e q^e_t + h \cdot \max(0, I_t) + s \cdot \max(0, - I_t)\,,
+   c_t = c^r q^r_t + c^e q^e_t + h \max(0, I_t) + s \max(0, - I_t)\,,
 
 where :math:`I_t` is the inventory level at period :math:`t`, :math:`q^r_t` is the regular order sent at period :math:`t`, :math:`q^e_t` is the expedited order sent at period :math:`t`. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The higher the regular or expedited order costs, the more costly it is to send the respective orders. The cost can be calculated using the `get_cost` method of the sourcing model.
 
