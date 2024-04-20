@@ -251,7 +251,7 @@ regular_q, expedited_q = dual_controller.forward(
 
 ### Save and load the model
 
-It is also a good idea to save the trained neural network controller for future use. This can be done using the `save` method. The `load` method allows one to load a previously saved model.
+To save and load a given model, one can use the `save` and `load` methods, respectively.
 
 ```python
 # Save the model
