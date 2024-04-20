@@ -77,7 +77,7 @@ After training, we can use the trained neural network controller to calculate th
 
     single_controller.get_total_cost(sourcing_model=single_sourcing_model, sourcing_periods=100)
 
-Simulation, Plotting and Order Calculation
+Simulation, Plotting, and Order Calculation
 ------------------------------------------
 
 We can also inspect how the controller performs in the specified sourcing environment by (i) plotting the inventory and order histories and (ii) calculating optimal orders.
