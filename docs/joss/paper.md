@@ -56,7 +56,7 @@ Single-sourcing problems are inventory management problems where only one delive
 
 ### Initialization
 
-Since we deal with the single-sourcing problem, we use the `SingleSourcingModel` class to initialize the sourcing model. Let us pick a single sourcing model which has a lead time of 0 (i.e., the order arrives immediately after it is placed), an initial inventory of 10 and a batch size of 32. The holding cost, $h$, and the shortage cost, $s$, are 5 and 495, respectively. The demand is generated from a uniform distribution with support $[1, 4]$. Notice that both the `demand_low` and `demand_low` parameter are inclusive. Hence, the generated demand will never exceed 4. In our code, the sourcing model is initialized as follows.
+Since we deal with the single-sourcing problem, we use the `SingleSourcingModel` class to initialize the sourcing model. Let us pick a single sourcing model which has a lead time of 0 (i.e., the order arrives immediately after it is placed), an initial inventory of 10 and a batch size of 32. The holding cost, $h$, and the shortage cost, $s$, are 5 and 495, respectively. The demand is generated from a uniform distribution with support $[1, 4]$. Notice that both the `demand_low` and `demand_low` parameters are inclusive. Hence, the generated demand will never exceed 4. In `idinn`, the sourcing model is initialized as follows.
 
 ```python
   import torch
@@ -157,7 +157,7 @@ Dual-sourcing problems are similar to single-sourcing problems but are more intr
 
 ### Initialization
 
-To address dual-sourcing problems, we employ two main classes: `DualSourcingModel` and `DualSourcingNeuralController`, responsible for setting up the sourcing model and its corresponding controller. In this example, we examine a dual-sourcing model characterized by the following parameters: both regular order lead time and expedited order lead time are set to 0; the regular order cost, $c^r$, is 0; the expedited order cost, $c^e$, is 20; the initial inventory is 6, and the batch size is 256. Additionally, the holding cost, $h$, and the shortage cost, $s$, are 5 and 495, respectively. Demand is generated from a uniform distribution with interval $[0, 4]$. Notice that both the `demand_low` and `demand_low` parameter are inclusive (closed bracket). Hence, the generated demand will never exceed 4. In `idinn`, the sourcing model is initialized as follows.
+To address dual-sourcing problems, we employ two main classes: `DualSourcingModel` and `DualSourcingNeuralController`, responsible for setting up the sourcing model and its corresponding controller. In this example, we examine a dual-sourcing model characterized by the following parameters: both regular order lead time and expedited order lead time are set to 0; the regular order cost, $c^r$, is 0; the expedited order cost, $c^e$, is 20; the initial inventory is 6, and the batch size is 256. Additionally, the holding cost, $h$, and the shortage cost, $s$, are 5 and 495, respectively. Demand is generated from a uniform distribution with interval $[1, 4]$. Notice that both the `demand_low` and `demand_low` parameters are inclusive. Hence, the generated demand will never exceed 4. In `idinn`, the sourcing model is initialized as follows.
 
 ```python    
 import torch
@@ -182,7 +182,7 @@ dual_sourcing_model = DualSourcingModel(
 The cost at period `t`, `c_t`, is
 
 $$
-c_t = c^r q^r_t + c^e q^e_t + h \max(0, I_t) + s \max(0, - I_t)\,
+c_t = c^r q^r_t + c^e q^e_t + h \max(0, I_t) + s \max(0, - I_t)\,,
 $$
 
 where $I_t$ is the inventory level at period $t$, $q^r_t$ is the regular order sent at period $t$, $q^e_t$ is the expedited order sent at period $t$. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The higher the regular or expedited order costs, the more costly it is to send the respective orders. The cost can be calculated using the `get_cost` method of the sourcing model.
