@@ -203,7 +203,7 @@ dual_controller = DualSourcingNeuralController(
 
 ### Training
 
-Although the neural network controller has not been trained yet, we can still utilize it to calculate the total cost if we apply this controller for 100 periods alongside our previously specified sourcing model.
+Although the neural network controller has not been trained yet, we can still compute the total cost associated with its order policy. To do so, we integrate it with our previously specified sourcing model and run simulations for 100 periods.
 
 ```python
 dual_controller.get_total_cost(sourcing_model=dual_sourcing_model, sourcing_periods=100)
