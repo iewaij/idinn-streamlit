@@ -29,7 +29,7 @@ affiliations:
    index: 3
  - name: Laboratory for Systems Medicine, Department of Medicine, University of Florida
    index: 4
-date: 19 April 2024
+date: 20 April 2024
 bibliography: paper.bib
 
 ---
@@ -56,7 +56,7 @@ Single-sourcing problems are inventory management problems where only one delive
 
 ### Initialization
 
-Since we deal with the single-sourcing problem, we use the `SingleSourcingModel` class to initialize the sourcing model. Let us pick a single sourcing model which has a lead time of 0, i.e. the order arrives immediately after it is placed, an initial inventory of 10 and a batch size of 32. The holding cost, $h$, is 5 and the shortage cost, $s$, is 495. The demand is generated from a uniform distribution with interval $[1, 4]$. Notice that both the `demand_low` and `demand_low` parameter are inclusive (closed bracket). Hence, the generated demand will never exceed 4. In our code, the sourcing model is initialized as follows.
+Since we deal with the single-sourcing problem, we use the `SingleSourcingModel` class to initialize the sourcing model. Let us pick a single sourcing model which has a lead time of 0 (i.e., the order arrives immediately after it is placed), an initial inventory of 10 and a batch size of 32. The holding cost $h$ and the shortage cost $s$ are 5 and 495, respectively. The demand is generated from a uniform distribution with support $[1, 4]$. Notice that both the `demand_low` and `demand_low` parameter are inclusive. Hence, the generated demand will never exceed 4. In our code, the sourcing model is initialized as follows.
 
 ```python
   import torch
