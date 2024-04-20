@@ -6,7 +6,9 @@ Dual-sourcing problems are similar to single-sourcing problems but are more intr
 Initialization
 --------------
 
-To address dual-sourcing problems, we employ two main classes: `DualSourcingModel` and `DualSourcingNeuralController`, responsible for setting up the sourcing model and its corresponding controller. In this tutorial, we examine a dual-sourcing model characterized by the following parameters: both regular order lead time and expedited order lead time are set to 0; the regular order cost, :math:`c^r`, is 0; the expedited order cost, :math:`c^e`, is 20; the initial inventory is 6, and the batch size is 256. Additionally, the holding cost, :math:`h`, and the shortage cost, :math:`s`, are 5 and 495, respectively. Demand is generated from a uniform distribution with interval :math:`[1, 4]`. Notice that both the `demand_low` and `demand_low` parameters are inclusive. Hence, the generated demand will never exceed 4. In `idinn`, the sourcing model is initialized as follows.
+To address dual-sourcing problems, we employ two main classes: `DualSourcingModel` and `DualSourcingNeuralController`, responsible for setting up the sourcing model and its corresponding controller. In this tutorial, we examine a dual-sourcing model characterized by the following parameters: both regular order lead time and expedited order lead time are set to 0; the regular order cost, :math:`c^r`, is 0; the expedited order cost, :math:`c^e`, is 20; the initial inventory is 6, and the batch size is 256. Additionally, the holding cost, :math:`h`, and the shortage cost, :math:`s`, are 5 and 495, respectively. Demand is generated from a uniform distribution with interval :math:`[1, 4]`. Notice that both the `demand_low` and `demand_low` parameters are inclusive. Hence, the generated demand will never exceed 4. 
+
+In `idinn`, the sourcing model is initialized as follows.
 
 .. code-block:: python
     
