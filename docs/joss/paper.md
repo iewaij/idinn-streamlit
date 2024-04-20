@@ -38,7 +38,7 @@ bibliography: paper.bib
 
 Identifying optimal policies for replenishing inventory from multiple suppliers is a key problem in inventory management. Solving such optimization problems means that one must determine the quantities to order from each supplier based on the current net inventory and outstanding orders, minimizing the expected backlogging, holding, and sourcing costs. Despite over 60 years of extensive research on inventory management problems, even fundamental dual-sourcing problems [@barankin1961delivery,@fukuda1964optimal]—where orders from an expensive supplier arrive faster than orders from a regular supplier—remain analytically intractable. Additionally, there is a growing interest in optimization algorithms that are capable of handling real-world inventory problems with large numbers of suppliers and non-stationary demand.
 
-We provide a Python package, `idinn`, implementing inventory dynamics–informed neural networks designed for controlling both single-sourcing and dual-sourcing problems. Neural network controllers and inventory dynamics are implemented into customizable objects with PyTorch backend, to enable users to find the optimal neural controllers for the user-specified inventory systems.
+We provide a Python package, `idinn`, implementing inventory dynamics–informed neural networks designed for controlling both single-sourcing and dual-sourcing problems. Neural network controllers and inventory dynamics are implemented as customizable objects with a PyTorch backend, enabling users to identify near-optimal order policies for a given inventory management problem.
 
 # Statement of need
 
