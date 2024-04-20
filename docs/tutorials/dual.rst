@@ -53,7 +53,7 @@ For dual-sourcing problems, we initialize the neural network controller using th
 Training
 --------
 
-Although the neural network controller has not been trained yet, we can still utilize it to calculate the total cost if we apply this controller for 100 periods alongside our previously specified sourcing model.
+Although the neural network controller has not been trained yet, we can still compute the total cost associated with its order policy. To do so, we integrate it with our previously specified sourcing model and run simulations for 100 periods.
 
 .. code-block:: python
 
