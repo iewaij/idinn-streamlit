@@ -157,7 +157,7 @@ Dual-sourcing problems are similar to single-sourcing problems but are more intr
 
 ### Initialization
 
-To address dual-sourcing problems, we employ two main classes: `DualSourcingModel` and `DualSourcingNeuralController`, responsible for setting up the sourcing model and its corresponding controller. We adopt a dual-sourcing model with specific parameters: regular order lead time and expedited order lead time both set to 0, regular order cost, $c^r$, at 0, expedited order cost, $c^e$, at 20, initial inventory of 6, and a batch size of 256. Additionally, the holding cost, $h$, is 5, while the shortage cost, $s$, is 495. Demand is generated from a uniform distribution with interval $[0, 4]$. Notice that both the `demand_low` and `demand_low` parameter are inclusive (closed bracket). Hence, the generated demand will never exceed 4. In code, the sourcing model is initialized as follows:
+To address dual-sourcing problems, we employ two main classes: `DualSourcingModel` and `DualSourcingNeuralController`, responsible for setting up the sourcing model and its corresponding controller. We adopt a dual-sourcing model with specific parameters: regular order lead time and expedited order lead time both set to 0, regular order cost, $c^r$, at 0, expedited order cost, $c^e$, at 20, initial inventory of 6, and a batch size of 256. Additionally, the holding cost, $h$, is 5, while the shortage cost, $s$, is 495. Demand is generated from a uniform distribution with interval $[0, 4]$. Notice that both the `demand_low` and `demand_low` parameter are inclusive (closed bracket). Hence, the generated demand will never exceed 4. In `idinn`, the sourcing model is initialized as follows.
 
 ```python    
 import torch
@@ -182,7 +182,7 @@ dual_sourcing_model = DualSourcingModel(
 The cost at period `t`, `c_t`, is
 
 $$
-c_t = c^r q^r_t + c^e q^e_t + h \cdot \max(0, I_t) + s \cdot \max(0, - I_t)\,
+c_t = c^r q^r_t + c^e q^e_t + h \max(0, I_t) + s \max(0, - I_t)\,
 $$
 
 where $I_t$ is the inventory level at period $t$, $q^r_t$ is the regular order sent at period $t$, $q^e_t$ is the expedited order sent at period $t$. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The higher the regular or expedited order costs, the more costly it is to send the respective orders. The cost can be calculated using the `get_cost` method of the sourcing model.
