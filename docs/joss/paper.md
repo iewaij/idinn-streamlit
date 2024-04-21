@@ -40,7 +40,7 @@ Identifying optimal policies for replenishing inventory from multiple suppliers 
 
 We provide a Python package, `idinn`, implementing inventory dynamics–informed neural networks designed for controlling both single-sourcing and dual-sourcing problems. Neural network controllers and inventory dynamics are implemented as customizable objects with a PyTorch backend, enabling users to identify near-optimal order policies for a given inventory management problem.
 
-The methods employed in `idinn` leverage advancements in automatic differentiation [@paszke2017automatic,@DBLP:conf/nips/PaszkeGMLBCKLGA19] and the growing use of neural networks in dynamical system identification [@wang1998runge,@DBLP:conf/nips/ChenRBD18,@fronk2023interpretable] and control [@asikis2022neural,@bottcher2022ai,@bottcher2022near,@mowlavi2023optimal,@bottcher2023gradient,@bottcher2024control]. 
+The methods employed in `idinn` leverage advancements in automatic differentiation [@paszke2017automatic,@DBLP:conf/nips/PaszkeGMLBCKLGA19] and the growing use of neural networks in dynamical system identification [@wang1998runge,@ChenRBD18,@fronk2023interpretable] and control [@asikis2022neural,@bottcher2022ai,@bottcher2022near,@mowlavi2023optimal,@bottcher2023gradient,@bottcher2024control]. 
 
 # Statement of need
 
