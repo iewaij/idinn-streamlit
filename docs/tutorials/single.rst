@@ -37,7 +37,7 @@ where :math:`I_t` is the inventory level at period :math:`t`. The higher the hol
 
 .. code-block:: python
     
-   single_sourcing_model.get_cost()
+   single_sourcing_model.get_total_cost()
 
 In our example, this function should return 50 for each sample since the initial inventory is 10 and the holding cost is 5. We have 32 samples in this case, as we specified a batch size of 32.
 

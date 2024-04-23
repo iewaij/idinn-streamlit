@@ -40,7 +40,7 @@ where :math:`I_t` is the inventory level at period :math:`t`, :math:`q^r_t` is t
 
 .. code-block:: python
     
-   dual_sourcing_model.get_cost(regular_q=0, expedited_q=0)
+   dual_sourcing_model.get_total_cost(regular_q=0, expedited_q=0)
 
 In our example, this function should return 30 for each sample since the initial inventory is 6, the holding cost is 5, and there is neither a regular nor expedited order. We have 256 samples in this case, as we specified a batch size of 256.
 
