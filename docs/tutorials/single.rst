@@ -6,7 +6,7 @@ Single-sourcing problems are inventory management problems where only one delive
 Initialization
 --------------
 
-Since we deal with the single-sourcing problem, we use the `SingleSourcingModel` class to initialize the sourcing model. In this tutorial, let us pick a single sourcing model which has a lead time of 0, i.e. the order arrives immediately after it is placed, an initial inventory of 10 and a batch size of 32. The holding cost, :math:`h`, and the shortage cost, :math:`b`, are 5 and 495, respectively. The demand is generated from a discrete uniform distribution with support :math:`[1, 4]`. Notice that both the `demand_low` and `demand_low` parameters are inclusive. Hence, the generated demand will never exceed 4. 
+Since we deal with the single-sourcing problem, we use the `SingleSourcingModel` class to initialize the sourcing model. In this tutorial, let us pick a single sourcing model which has a lead time of 0 (i.e., the order arrives immediately after it is placed) and an initial inventory of 10. The holding cost, :math:`h`, and the shortage cost, :math:`b`, are 5 and 495, respectively. The demand is generated from a discrete uniform distribution with support :math:`[1, 4]`. Notice that both the `demand_low` and `demand_low` parameters are inclusive. In this example, we use a batch size of 32.
 
 In `idinn`, the sourcing model is initialized as follows.
 
