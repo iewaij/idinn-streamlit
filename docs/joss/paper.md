@@ -161,7 +161,7 @@ We can solve dual-sourcing problems with `idinn` in a way similar to the solutio
 
 ### Initialization
 
-To address dual-sourcing problems, we employ two main classes: (i) `DualSourcingModel` and (ii) `DualSourcingNeuralController`, responsible for setting up the sourcing model and its corresponding controller. In this example, we examine a dual-sourcing model characterized by the following parameters: both regular order lead time and expedited order lead time are set to 0; the regular order cost, $c^r$, is 0; the expedited order cost, $c^e$, is 20; the initial inventory is 6; and the batch size is 256. Additionally, the holding cost, $h$, and the shortage cost, $b$, are 5 and 495, respectively. Demand is generated from a discrete uniform distribution with interval $[1, 4]$. Notice that both the `demand_low` and `demand_low` parameters are inclusive. Hence, the generated demand will never exceed 4. 
+To address dual-sourcing problems, we employ two main classes: (i) `DualSourcingModel` and (ii) `DualSourcingNeuralController`, responsible for setting up the sourcing model and its corresponding controller. In this example, we examine a dual-sourcing model characterized by the following parameters: both regular order lead time and expedited order lead time are set to 0; the regular order cost, $c^r$, is 0; the expedited order cost, $c^e$, is 20; and the initial inventory is 6. Additionally, the holding cost, $h$, and the shortage cost, $b$, are 5 and 495, respectively. Demand is generated from a discrete uniform distribution with interval $[1, 4]$. Notice that both the `demand_low` and `demand_low` parameters are inclusive. In this example, we use a batch size of 256.
 
 In `idinn`, the sourcing model is initialized as follows.
 
