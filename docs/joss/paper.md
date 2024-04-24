@@ -52,7 +52,7 @@ Training neural networks for inventory-dynamics control presents a specific chal
 
 # Example usage
 
-## Solve single-sourcing problems using neural networks
+## Single-sourcing problems
 
 The overall objective in single-sourcing and related inventory management problems is for companies to identify the optimal order quantities to minimize inventory-related costs, given stochastic demand. During periods when inventory remains after demand is met, each unit of excess inventory incurs a holding cost $h$. If the demand exceeds the available inventory in a period, the surplus demand is considered satisfied in subsequent periods, incurring a shortage cost $b$. This problem can be addressed using `idinn`. We first initialize the sourcing model and its associated neural network controller. Subsequently, we train the neural network controller using data generated from the sourcing model. Finally, we can use the trained neural network controller to compute near-optimal order quantities, which depend on the state of the system.
 
@@ -155,7 +155,7 @@ single_controller_loaded = SingleSourcingNeuralController(
 single_controller_loaded.load("optimal_single_sourcing_controller.pt")
 ```
 
-## Solve dual-sourcing problems using neural networks
+## Dual-sourcing problems
 
 We can solve dual-sourcing problems with `idinn` in a way similar to the solution to single-sourcing problems described in the previous section.
 
