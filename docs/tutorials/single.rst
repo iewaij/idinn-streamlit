@@ -33,7 +33,7 @@ The cost at period :math:`t`, :math:`c_t`, is
 
    c_t = h \max(0, I_t) + b \max(0, - I_t)\,,
 
-where :math:`I_t` is the inventory level at period :math:`t`. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The cost can be calculated using the `get_total_cost` method of the sourcing model.
+where :math:`I_t` is the inventory level at the end of period :math:`t`. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The cost can be calculated using the `get_total_cost` method of the sourcing model.
 
 .. code-block:: python
     
