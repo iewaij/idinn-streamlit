@@ -6,7 +6,7 @@ Single-sourcing problems are inventory management problems where only one delive
 Initialization
 --------------
 
-Since we deal with the single-sourcing problem, we use the `SingleSourcingModel` class to initialize the sourcing model. In this tutorial, let us pick a single sourcing model which has a lead time of 0, i.e. the order arrives immediately after it is placed, an initial inventory of 10 and a batch size of 32. The holding cost, :math:`h`, and the shortage cost, :math:`s`, are 5 and 495, respectively. The demand is generated from a uniform distribution with support :math:`[1, 4]`. Notice that both the `demand_low` and `demand_low` parameters are inclusive. Hence, the generated demand will never exceed 4. 
+Since we deal with the single-sourcing problem, we use the `SingleSourcingModel` class to initialize the sourcing model. In this tutorial, let us pick a single sourcing model which has a lead time of 0, i.e. the order arrives immediately after it is placed, an initial inventory of 10 and a batch size of 32. The holding cost, :math:`h`, and the shortage cost, :math:`b`, are 5 and 495, respectively. The demand is generated from a uniform distribution with support :math:`[1, 4]`. Notice that both the `demand_low` and `demand_low` parameters are inclusive. Hence, the generated demand will never exceed 4. 
 
 In `idinn`, the sourcing model is initialized as follows.
 
@@ -31,9 +31,9 @@ The cost at period :math:`t`, :math:`c_t`, is
 
 .. math::
 
-   c_t = h \max(0, I_t) + s \max(0, - I_t)\,,
+   c_t = h \max(0, I_t) + b \max(0, - I_t)\,,
 
-where :math:`I_t` is the inventory level at period :math:`t`. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The cost can be calculated using the `get_cost` method of the sourcing model.
+where :math:`I_t` is the inventory level at period :math:`t`. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The cost can be calculated using the `get_total_cost` method of the sourcing model.
 
 .. code-block:: python
     
