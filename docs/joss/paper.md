@@ -54,11 +54,11 @@ Training neural networks for inventory-dynamics control presents a specific chal
 
 ## Solve single-sourcing problems using neural networks
 
-The overall objective in single-sourcing and related inventory management problems is for companies to identify the optimal order quantities to minimize inventory-related costs, given stochastic demand. During periods when inventory remains after demand is met, each unit of excess inventory incurs a holding cost $h$. Conversely, if the demand exceeds the available inventory in a period, the surplus demand is considered satisfied in subsequent periods, incurring a shortage cost $s$. This problem can be addressed using `idinn`. We first initialize the sourcing model and its associated neural network controller. Subsequently, we train the neural network controller using data generated from the sourcing model. Finally, we can use the trained neural network controller to compute near-optimal order quantities, which depend on the state of the system.
+The overall objective in single-sourcing and related inventory management problems is for companies to identify the optimal order quantities to minimize inventory-related costs, given stochastic demand. During periods when inventory remains after demand is met, each unit of excess inventory incurs a holding cost $h$. Conversely, if the demand exceeds the available inventory in a period, the surplus demand is considered satisfied in subsequent periods, incurring a shortage cost $b$. This problem can be addressed using `idinn`. We first initialize the sourcing model and its associated neural network controller. Subsequently, we train the neural network controller using data generated from the sourcing model. Finally, we can use the trained neural network controller to compute near-optimal order quantities, which depend on the state of the system.
 
 ### Initialization
 
-We use the `SingleSourcingModel` class to initialize the sourcing model. Let us pick a single sourcing model which has a lead time of 0 (i.e., the order arrives immediately after it is placed), an initial inventory of 10 and a batch size of 32. The holding cost, $h$, and the shortage cost, $s$, are 5 and 495, respectively. The demand is generated from a discrete uniform distribution with support $[1, 4]$. Notice that both the `demand_low` and `demand_low` parameters are inclusive.
+We use the `SingleSourcingModel` class to initialize the sourcing model. Let us pick a single sourcing model which has a lead time of 0 (i.e., the order arrives immediately after it is placed), an initial inventory of 10 and a batch size of 32. The holding cost, $h$, and the shortage cost, $b$, are 5 and 495, respectively. The demand is generated from a discrete uniform distribution with support $[1, 4]$. Notice that both the `demand_low` and `demand_low` parameters are inclusive.
 
 In `idinn`, the sourcing model is initialized as follows.
 
@@ -82,13 +82,13 @@ In `idinn`, the sourcing model is initialized as follows.
 The cost at period $t$, $c_t$, is
 
 $$
-c_t = h \max(0, I_t) + s \max(0, - I_t)\,,
+c_t = h \max(0, I_t) + b \max(0, - I_t)\,,
 $$
 
-where $I_t$ is the inventory level at period $t$. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The joint holding and stockout cost across all periods can be can be calculated using the `get_cost` method of the sourcing model.
+where $I_t$ is the inventory level at period $t$. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The joint holding and stockout cost across all periods can be can be calculated using the `get_total_cost` method of the sourcing model.
 
 ```python    
-  single_sourcing_model.get_cost()
+  single_sourcing_model.get_total_cost()
 ```
 
 In our example, this function should return 50 for each sample since the initial inventory is 10 and the holding cost is 5. We have 32 samples in this case, as we specified a batch size of 32.
@@ -161,7 +161,7 @@ We can solve dual-sourcing problems with `idinn` in a way similar to the solutio
 
 ### Initialization
 
-To address dual-sourcing problems, we employ two main classes: `DualSourcingModel` and `DualSourcingNeuralController`, responsible for setting up the sourcing model and its corresponding controller. In this example, we examine a dual-sourcing model characterized by the following parameters: both regular order lead time and expedited order lead time are set to 0; the regular order cost, $c^r$, is 0; the expedited order cost, $c^e$, is 20; the initial inventory is 6, and the batch size is 256. Additionally, the holding cost, $h$, and the shortage cost, $s$, are 5 and 495, respectively. Demand is generated from a uniform distribution with interval $[1, 4]$. Notice that both the `demand_low` and `demand_low` parameters are inclusive. Hence, the generated demand will never exceed 4. 
+To address dual-sourcing problems, we employ two main classes: `DualSourcingModel` and `DualSourcingNeuralController`, responsible for setting up the sourcing model and its corresponding controller. In this example, we examine a dual-sourcing model characterized by the following parameters: both regular order lead time and expedited order lead time are set to 0; the regular order cost, $c^r$, is 0; the expedited order cost, $c^e$, is 20; the initial inventory is 6, and the batch size is 256. Additionally, the holding cost, $h$, and the shortage cost, $b$, are 5 and 495, respectively. Demand is generated from a uniform distribution with interval $[1, 4]$. Notice that both the `demand_low` and `demand_low` parameters are inclusive. Hence, the generated demand will never exceed 4. 
 
 In `idinn`, the sourcing model is initialized as follows.
 
@@ -188,13 +188,13 @@ dual_sourcing_model = DualSourcingModel(
 The cost at period `t`, `c_t`, is
 
 $$
-c_t = c^r q^r_t + c^e q^e_t + h \max(0, I_t) + s \max(0, - I_t)\,,
+c_t = c^r q^r_t + c^e q^e_t + h \max(0, I_t) + b \max(0, - I_t)\,,
 $$
 
-where $I_t$ is the inventory level at period $t$, $q^r_t$ is the regular order placed at period $t$, and $q^e_t$ is the expedited order placed at period $t$. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The higher the regular or expedited order costs, the more costly it is to place the respective orders. The cost can be calculated using the `get_cost` method of the sourcing model.
+where $I_t$ is the inventory level at period $t$, $q^r_t$ is the regular order placed at period $t$, and $q^e_t$ is the expedited order placed at period $t$. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The higher the regular or expedited order costs, the more costly it is to place the respective orders. The cost can be calculated using the `get_total_cost` method of the sourcing model.
 
 ```python    
-dual_sourcing_model.get_cost(regular_q=0, expedited_q=0)
+dual_sourcing_model.get_total_cost(regular_q=0, expedited_q=0)
 ```
 
 In our example, this function should return 30 for each sample since the initial inventory is 6, the holding cost is 5, and there is neither a regular nor expedited order. We have 256 samples in this case, as we specified a batch size of 256.
