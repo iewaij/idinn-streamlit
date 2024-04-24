@@ -191,7 +191,7 @@ $$
 c_t = c^r q^r_t + c^e q^e_t + h \max(0, I_t) + b \max(0, - I_t)\,,
 $$
 
-where $I_t$ is the inventory level at period $t$, $q^r_t$ is the regular order placed at period $t$, and $q^e_t$ is the expedited order placed at period $t$. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The higher the regular or expedited order costs, the more costly it is to place the respective orders. The cost can be calculated using the `get_total_cost` method of the sourcing model.
+where $I_t$ is the inventory level at the end of period $t$, $q^r_t$ is the regular order placed at period $t$, and $q^e_t$ is the expedited order placed at period $t$. The higher the holding cost, the more costly it is to keep the inventory (when the inventory level is positive). The higher the shortage cost, the more costly it is to run out of stock (when the inventory level is negative). The higher the regular or expedited order costs, the more costly it is to place the respective orders. The cost can be calculated using the `get_total_cost` method of the sourcing model.
 
 ```python    
 dual_sourcing_model.get_total_cost(regular_q=0, expedited_q=0)
