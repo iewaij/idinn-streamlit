@@ -238,7 +238,7 @@ dual_controller.get_total_cost(sourcing_model=dual_sourcing_model, sourcing_peri
 
 ### Simulation, plotting, and order calculation
 
-We can further examine the controller's performance in the specified sourcing environment by (i) plotting the inventory and order histories, and (ii) calculating optimal orders.
+We can further examine the controller's performance in the specified sourcing environment by (i) plotting the inventory and order histories, and (ii) calculating near-optimal orders.
 
 ```python
 # Simulate and plot the results
