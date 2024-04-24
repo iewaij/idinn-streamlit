@@ -25,7 +25,7 @@ In `idinn`, the sourcing model is initialized as follows.
         shortage_cost=495,
         batch_size=256,
         init_inventory=6,
-        demand_distribuion="uniform",
+        demand_distribution="uniform",
         demand_low=1,
         demand_high=4
     )
