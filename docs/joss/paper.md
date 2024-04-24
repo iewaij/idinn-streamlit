@@ -58,7 +58,7 @@ The overall objective in single-sourcing and related inventory management proble
 
 ### Initialization
 
-We use the `SingleSourcingModel` class to initialize the sourcing model. Let us pick a single sourcing model which has a lead time of 0 (i.e., the order arrives immediately after it is placed), an initial inventory of 10 and a batch size of 32. The holding cost, $h$, and the shortage cost, $b$, are 5 and 495, respectively. The demand is generated from a discrete uniform distribution with support $[1, 4]$. Notice that both the `demand_low` and `demand_low` parameters are inclusive.
+We use the `SingleSourcingModel` class to initialize the sourcing model. Let us pick a single sourcing model which has a lead time of 0 (i.e., the order arrives immediately after it is placed) and an initial inventory of 10. The holding cost, $h$, and the shortage cost, $b$, are 5 and 495, respectively. The demand is generated from a discrete uniform distribution with support $[1, 4]$. Notice that both the `demand_low` and `demand_low` parameters are inclusive. In this example, we use a batch size of 32.
 
 In `idinn`, the sourcing model is initialized as follows.
 
