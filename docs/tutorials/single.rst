@@ -65,7 +65,7 @@ Unsurprisingly, the performance is poor because we are only using the untrained 
     from torch.utils.tensorboard import SummaryWriter
 
     single_controller.train(
-        sourcing_model=sourcing_model,
+        sourcing_model=single_sourcing_model,
         sourcing_periods=50,
         validation_sourcing_periods=1000,
         epochs=5000,
