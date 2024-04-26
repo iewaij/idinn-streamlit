@@ -26,6 +26,7 @@ pip install -e .
 import torch
 from idinn.sourcing_model import SingleSourcingModel
 from idinn.controller import SingleSourcingNeuralController
+from idinn.demand import UniformDemand
 
 # Initialize the sourcing model and the neural controller
 sourcing_model = SingleSourcingModel(
@@ -34,11 +35,9 @@ sourcing_model = SingleSourcingModel(
     shortage_cost=495,
     batch_size=32,
     init_inventory=10,
-    demand_distribution="uniform",
-    demand_low=1,
-    demand_high=4
+    demand_generator=UniformDemand(low=1, high=4),
 )
-controller = SingleFullyConnectedNeuralController(
+controller = SingleSourcingNeuralController(
     hidden_layers=[2],
     activation=torch.nn.CELU(alpha=1)
 )
@@ -48,7 +47,6 @@ controller.train(
     sourcing_periods=50,
     validation_sourcing_periods=1000,
     epochs=5000,
-    tensorboard_writer=torch.utils.tensorboard.SummaryWriter(),
     seed=1,
 )
 # Simulate and plot the results
