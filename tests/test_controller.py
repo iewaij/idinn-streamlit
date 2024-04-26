@@ -11,9 +11,6 @@ def single_sourcing_model():
         shortage_cost=1,
         init_inventory=10,
         batch_size=1,
-        demand_distribuion="uniform",
-        demand_low=1,
-        demand_high=4
     )
 
 @pytest.fixture
@@ -63,9 +60,6 @@ def dual_sourcing_model():
         shortage_cost=1,
         init_inventory=10,
         batch_size=1,
-        demand_distribuion="uniform",
-        demand_low=1,
-        demand_high=4
     )
 
 @pytest.fixture

@@ -1,4 +1,5 @@
 import torch
+from .demand import UniformDemand
 
 
 class BaseSourcingModel:
@@ -13,10 +14,7 @@ class BaseSourcingModel:
         expedited_lead_time=None,
         regular_order_cost=None,
         expedited_order_cost=None,
-        demand=None,
-        demand_distribution="uniform",
-        demand_low=1,
-        demand_high=4,
+        demand_generator=UniformDemand(low=1, high=4),
     ):
         self.holding_cost = holding_cost
         self.shortage_cost = shortage_cost
@@ -29,18 +27,7 @@ class BaseSourcingModel:
         self.expedited_lead_time = expedited_lead_time
         self.regular_order_cost = regular_order_cost
         self.expedited_order_cost = expedited_order_cost
-
-        if demand is not None:
-            self.demand_iterator = iter(demand)
-        elif demand_distribution is not None:
-            if demand_distribution == "uniform":
-                self.demand_iterator = torch.distributions.Uniform(
-                    low=demand_low, high=demand_high + 1
-                )
-            else:
-                raise ValueError("Only `uniform` distribution is supported.")
-        else:
-            raise ValueError("`demand` or `demand_distribution` must be provided.")
+        self.demand_generator = demand_generator
         self.reset()
 
     def reset(
@@ -91,27 +78,6 @@ class BaseSourcingModel:
         # https://discuss.pytorch.org/t/solved-simple-question-about-keep-dim-when-slicing-the-tensor/9280
         return self.past_inventories[:, [-1]]
 
-    def generate_demand(self):
-        """
-        Generate demands depending on the type of demand_iterator.
-        """
-        if isinstance(self.demand_iterator, torch.distributions.Uniform):
-            current_demand = self.demand_iterator.sample((self.batch_size, 1)).int()
-        else:
-            try:
-                current_demand = next(self.demand_iterator)
-            except StopIteration:
-                raise ValueError(
-                    "`demand` is not long enough for the overall sourcing periods."
-                )
-            # Ensure demand is a tensor of non-negative integers and the shape conforms to (batch_size,1)
-            if not isinstance(current_demand, torch.Tensor):
-                current_demand = (
-                    torch.tensor(current_demand).int().repeat(self.batch_size, 1)
-                )
-                current_demand = torch.clamp(current_demand, min=0)
-        return current_demand
-
 
 class SingleSourcingModel(BaseSourcingModel):
     def __init__(
@@ -121,10 +87,7 @@ class SingleSourcingModel(BaseSourcingModel):
         shortage_cost,
         init_inventory,
         batch_size=1,
-        demand=None,
-        demand_distribution="uniform",
-        demand_low=1,
-        demand_high=4,
+        demand_generator=UniformDemand(low=1, high=4),
     ):
         """
         Parameters
@@ -154,10 +117,7 @@ class SingleSourcingModel(BaseSourcingModel):
             shortage_cost=shortage_cost,
             init_inventory=init_inventory,
             batch_size=batch_size,
-            demand=demand,
-            demand_distribution=demand_distribution,
-            demand_low=demand_low,
-            demand_high=demand_high,
+            demand_generator=demand_generator,
         )
 
     def get_lead_time(self):
@@ -190,7 +150,7 @@ class SingleSourcingModel(BaseSourcingModel):
         # Past orders arrived
         arrived_order = self.past_orders[:, [-1 - self.lead_time]]
         # Generate current demand
-        current_demand = self.generate_demand()
+        current_demand = self.demand_generator.sample(self.batch_size)
         # Update inventory
         current_inventory = (
             self.get_current_inventory() + arrived_order - current_demand
@@ -212,10 +172,7 @@ class DualSourcingModel(BaseSourcingModel):
         shortage_cost,
         init_inventory,
         batch_size=1,
-        demand=None,
-        demand_distribution="uniform",
-        demand_low=1,
-        demand_high=4,
+        demand_generator=UniformDemand(low=1, high=4),
     ):
         """
         Parameters
@@ -254,10 +211,7 @@ class DualSourcingModel(BaseSourcingModel):
             shortage_cost=shortage_cost,
             init_inventory=init_inventory,
             batch_size=batch_size,
-            demand=demand,
-            demand_distribution=demand_distribution,
-            demand_low=demand_low,
-            demand_high=demand_high,
+            demand_generator=demand_generator,
         )
 
     def get_past_regular_orders(self):
@@ -290,7 +244,7 @@ class DualSourcingModel(BaseSourcingModel):
         regular_q : int, or torch.Tensor
             The quantity of items to order from the regular supplier.
         expedited_q : int, or torch.Tensor
-            The quantity of items to order from the expedited supplier.    
+            The quantity of items to order from the expedited supplier.
         seed : int, optional
             Random seed for reproducibility.
         """
@@ -317,7 +271,7 @@ class DualSourcingModel(BaseSourcingModel):
             :, [-1 - self.expedited_lead_time]
         ]
         # Generate current demand
-        current_demand = self.generate_demand()
+        current_demand = self.demand_generator.sample(self.batch_size)
         # Update inventory
         current_inventory = (
             self.get_current_inventory()
