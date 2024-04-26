@@ -93,6 +93,8 @@ where $I_t$ is the inventory level at the end of period $t$. The higher the hold
 
 In our example, this function should return 50 for each sample since the initial inventory is 10 and the holding cost is 5. We have 32 samples in this case, as we specified a batch size of 32.
 
+This function is used, alongside the state dynamics of the system, to calculate the total cost over a give horizon. If an order takes $l$ periods to arrive, the information that describes the state of the system at the beginning of period $t$ is (i) the current inventory level, $s_t$, and (ii) the history of past orders that have not yet arrived, i.e., the vector $(q_{t-1}, q_{t-2}, \dots, q_{t-l})$. Thus, the state vectos is $(s_t, q_{t-1}, q_{t-2}, \dots, q_{t-l})$. This vector is observed again at the beginning of period $t+1$. Until then, three events have happened, in this order: (i) the order quantity $q_{t-l}$ arrives, (ii) we decide how much to order, $q_t$, and (iii) demand for the period is realized. Thus, the state in period $t+1$ is $(s_{t}+q_{t-l}-d_t, q_{t}, q_{t-1}, \dots, q_{t-l-1})$. This transition is probabilistic and depends on the realization of demand, $d_t$. Therefore, we invoke function `get_total_cost()` at the end of period $t$, using the end-of-period inventory level $s_t+q_{t-l}-d_t$. The interested reader is referred to for details.  
+
 For single-sourcing problems, we initialize the neural network controller using the `SingleSourcingNeuralController` class. For illustration, we use a simple neural network with 1 hidden layer and 2 neurons. The activation function is `torch.nn.CELU(alpha=1)`. The neural network controller is initialized as follows.
 
 ```python
