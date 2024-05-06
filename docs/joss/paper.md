@@ -162,6 +162,7 @@ To address dual-sourcing problems, we employ two main classes: (i) `DualSourcing
 import torch
 from idinn.sourcing_model import DualSourcingModel
 from idinn.controller import DualSourcingNeuralController
+from idinn.demand import UniformDemand
 
 dual_sourcing_model = DualSourcingModel(
     regular_lead_time=2,
@@ -172,9 +173,7 @@ dual_sourcing_model = DualSourcingModel(
     shortage_cost=495,
     batch_size=256,
     init_inventory=6,
-    demand_distribution="uniform",
-    demand_low=1,
-    demand_high=4
+    demand_generator=UniformDemand(low=1, high=4),
 )
 ```
 
