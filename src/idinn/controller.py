@@ -109,8 +109,10 @@ class SingleSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
         if not isinstance(past_orders, torch.Tensor):
             past_orders = torch.tensor([past_orders], dtype=torch.float32)
         if self.lead_time > 0:
-            h = torch.cat([current_inventory, past_orders[:, -self.lead_time :]], dim=1)
-        h = self.stack(h)
+            inputs = torch.cat([current_inventory, past_orders[:, -self.lead_time :]], dim=1)
+        else:
+            inputs = current_inventory
+        h = self.stack(inputs)
         q = h - torch.frac(h).clone().detach()
         return q
 
@@ -183,6 +185,9 @@ class SingleSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
         """
         if seed is not None:
             torch.manual_seed(seed)
+
+        if self.lead_time is None:
+            self.init_layers(sourcing_model.get_lead_time())
 
         optimizer_init_inventory = torch.optim.RMSprop(
             [sourcing_model.init_inventory], lr=lr_init_inventory
@@ -423,6 +428,8 @@ class DualSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
                     ],
                     dim=1,
                 )
+        else:
+            inputs = current_inventory
 
         if self.expedited_lead_time > 0:
             inputs = torch.cat(
@@ -510,6 +517,12 @@ class DualSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
         """
         if seed is not None:
             torch.manual_seed(seed)
+
+        if self.lead_time is None:
+            self.init_layers(
+                regular_lead_time=sourcing_model.get_regular_lead_time(),
+                expedited_lead_time=sourcing_model.get_expedited_lead_time(),
+            )
 
         optimizer_init_inventory = torch.optim.RMSprop(
             [sourcing_model.init_inventory], lr=lr_init_inventory
