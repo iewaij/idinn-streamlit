@@ -85,7 +85,7 @@ After training, we can use the trained neural network controller to calculate th
 Plotting and Order Calculation
 ------------------------------------------
 
-We can also inspect how the controller performs in the specified sourcing environment by plotting the inventory and order histories.
+We can inspect how the controller performs in the specified sourcing environment by plotting the inventory and order histories.
 
 .. code-block:: python
 
