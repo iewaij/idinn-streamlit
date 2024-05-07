@@ -94,7 +94,7 @@ In this example, this function should return 50 for each sample since the initia
 
 The function `get_total_cost()`  is used, alongside the state dynamics of the system, to calculate the total cost over a given horizon. If an order takes $l$ periods to arrive, the information that describes the state of the system at the beginning of period $t$ is (i) the current inventory level, $s_t$, and (ii) the history of past orders that have not yet arrived, i.e., the vector $(q_{t-1}, q_{t-2}, \dots, q_{t-l})$. Thus, the state vector is $(s_t, q_{t-1}, q_{t-2}, \dots, q_{t-l})$. This vector is observed again at the beginning of period $t+1$. Until then, three events happen (in this order): (i) the order quantity $q_{t-l}$ arrives, (ii) we decide how much to order, $q_t$, and (iii) demand for the current period, $d_t$, is realized. Thus, the state in period $t+1$ is $(s_{t}+q_{t-l}-d_t, q_{t}, q_{t-1}, \dots, q_{t-l+1})$. This transition is probabilistic and depends on the realization of demand, $d_t$. In the function `get_total_cost()`, we sum over all the end-of-period inventory levels $s_t+q_{t-l}-d_t$. The interested reader is referred to @bottcher2023control for further details.  
 
-For single-sourcing problems, we initialize the neural network controller using the `SingleSourcingNeuralController` class. For illustration, we use a simple neural network with 1 hidden layer and 2 neurons. The activation function is `torch.nn.CELU(alpha=1)`.
+For single-sourcing problems, we initialize the neural network controller using the `SingleSourcingNeuralController` class. For illustration purposes, we employ a simple neural network with 1 hidden layer and 2 neurons. The activation function is `torch.nn.CELU(alpha=1)`.
 
 ```python
 single_controller = SingleSourcingNeuralController(
@@ -136,7 +136,7 @@ single_controller.get_total_cost(sourcing_model=single_sourcing_model, sourcing_
 
 ### Plotting and order calculation
 
-We can also inspect how the controller performs in the specified sourcing environment by plotting the inventory and order histories.
+We can inspect how the controller performs in the specified sourcing environment by plotting the inventory and order histories.
 
 ```python
 # Simulate and plot the results
@@ -152,7 +152,7 @@ single_controller.forward(current_inventory=10, past_orders=[1, 5])
 
 ## Dual-sourcing problems
 
-We can solve dual-sourcing problems with `idinn` in a way similar to the solution to single-sourcing problems described in the previous section.
+Solving dual-sourcing problems with `idinn` is similar to the approached employed for single-sourcing problems described in the previous section.
 
 ### Initialization
 
