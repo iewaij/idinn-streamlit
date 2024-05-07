@@ -83,14 +83,14 @@ After training, we can use the trained neural network controller to calculate th
 Plotting and Order Calculation
 ------------------------------------------
 
-We can also inspect how the controller performs in the specified sourcing environment by plotting the inventory and order histories.
+We can inspect how the controller performs in the specified sourcing environment by plotting the inventory and order histories.
 
 .. code-block:: python
 
     # Simulate and plot the results
     >>> dual_controller.plot(sourcing_model=dual_sourcing_model, sourcing_periods=100)
 
-Then we can use the trained network to calculate optimal orders.
+Then we can use the trained network to calculate near-optimal orders.
 
 .. code-block:: python
 
