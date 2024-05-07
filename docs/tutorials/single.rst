@@ -1,12 +1,12 @@
 Solve Single-Sourcing Problems Using Neural Networks
 ====================================================
 
-The overall objective in single-sourcing and related inventory management problems is for companies to identify the optimal order quantities to minimize inventory-related costs, given stochastic demand. During periods when inventory remains after demand is met, each unit of excess inventory incurs a holding cost :math:`h`. If the demand exceeds the available inventory in a period, the surplus demand is considered satisfied in subsequent periods, incurring a shortage cost :math:`b`. This problem can be addressed using `idinn`. As illustrated in the :doc:`/get_started/get_started` section, we first initialize the sourcing model and its associated neural network controller. Subsequently, we train the neural network controller using data generated from the sourcing model. Finally, we use the trained neural network controller to compute optimal order quantities, which depends on the state of the system.
+The overall objective in single-sourcing and related inventory management problems is for companies to identify the optimal order quantities to minimize inventory-related costs, given stochastic demand. During periods when inventory remains after demand is met, each unit of excess inventory incurs a holding cost :math:`h`. If the demand exceeds the available inventory in a period, the surplus demand is considered satisfied in subsequent periods, incurring a shortage cost :math:`b`. This problem can be addressed using `idinn`. As illustrated in the :doc:`/get_started/get_started` section, we first initialize the sourcing model and its associated neural network controller. Subsequently, we train the neural network controller using data generated from the sourcing model. Finally, we use the trained neural network controller to compute optimal order quantities, which depend on the state of the system.
 
 Initialization
 --------------
 
-We use the `SingleSourcingModel` class to initialize a single-sourcing model. The single sourcing model demostrated in this example has a lead time of 0, i.e., the order arrives immediately after it is placed, and initial inventory of 10. The holding cost, :math:`h`, and the shortage cost, :math:`b`, are 5 and 495, respectively. The demand is generated from a discrete uniform distribution bounded on :math:`[1, 4]`. We also use batch size of 32 for training the neural network, i.e. the sourcing model generate 32 samples simmutanously.
+We use the `SingleSourcingModel` class to initialize a single-sourcing model. The single-sourcing model considered in this example has a lead time of 0, i.e., the order arrives immediately after it is placed, and initial inventory of 10. The holding cost, :math:`h`, and the shortage cost, :math:`b`, are 5 and 495, respectively. The demand is generated from a discrete uniform distribution with support :math:`[1, 4]`. We use a batch size of 32 for training the neural network, i.e. the sourcing model generate 32 samples simultaneously.
 
 .. code-block:: python
     
@@ -38,7 +38,7 @@ where :math:`I_t` is the inventory level at the end of period :math:`t`. The hig
 
 In this example, this function should return 50 for each sample since the initial inventory is 10 and the holding cost is 5. We have 32 samples in this case, as we specified the batch size to be 32.
 
-For single-sourcing problems, we use the neural network controller of the `SingleSourcingNeuralController` class. For illustration, we use a simple neural network with 1 hidden layer and 2 neurons. The activation function is `torch.nn.CELU(alpha=1)`.
+For single-sourcing problems, we use the neural network controller of the `SingleSourcingNeuralController` class. For illustration purposes, we employ a simple neural network with 1 hidden layer and 2 neurons. The activation function is `torch.nn.CELU(alpha=1)`.
 
 .. code-block:: python
 
