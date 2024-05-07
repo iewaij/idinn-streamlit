@@ -4,7 +4,7 @@ Get Started
 Initialization
 --------------
 
-The basic usage of `idinn` starts with a sourcing model and a controller. First, initialize a sourcing model, such as :class:`SingleSourcingModel`, with desired parameters according to users' needs.
+The basic usage of `idinn` starts with a sourcing model and a controller. First, initialize a sourcing model, such as :class:`SingleSourcingModel`, with your preferred parameters.
 
 .. code-block:: python
     
