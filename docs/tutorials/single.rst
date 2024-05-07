@@ -87,6 +87,8 @@ Plotting and Order Calculation
 
 We can also inspect how the controller performs in the specified sourcing environment by plotting the inventory and order histories.
 
+.. code-block:: python
+
     # Simulate and plot the results
     >>> single_controller.plot(sourcing_model=single_sourcing_model, sourcing_periods=100)
     
