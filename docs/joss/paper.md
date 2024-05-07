@@ -29,7 +29,7 @@ affiliations:
    index: 3
  - name: Laboratory for Systems Medicine, Department of Medicine, University of Florida
    index: 4
-date: 26 April 2024
+date: 7 May 2024
 bibliography: paper.bib
 
 ---
@@ -46,7 +46,7 @@ The methods employed in `idinn` leverage advancements in automatic differentiati
 
 Inventory management problems arise in several industries, such as manufacturing, retail, hospitality, fast-fashion, warehousing operations, and energy. A basic and yet analytically intractable problem in inventory management is dual sourcing [@barankin1961delivery,@fukuda1964optimal,@xin2023dual]. `idinn` is a Python package for controlling dual-sourcing inventory dynamics with dynamics-informed neural networks. The classical dual-sourcing problem we consider is usually formulated as an infinite-horizon problem focused on minimizing average costs while accounting for stationary stochastic demand. Employing neural networks, we minimize costs across several demand trajectories. This approach enables us to address not only non-stationary demand but also finite-horizon and infinite-horizon discounted problems. Unlike traditional reinforcement-learning approaches, our optimization approach takes into account how the system being optimized behaves over time, leading to more efficient training and accurate solutions. 
 
-Training neural networks for inventory-dynamics control presents a specific challenge. The adjustment of neural network weights during training relies on propagating real-valued gradients, whereas the neural network outputs—representing replenishment orders—must be integers. To address this challenge in optimizing a discrete problem with real-valued gradient descent learning algorithms, we employ a problem-tailored straight-through estimator [@yang2022injecting,@asikis2023multi]. This approach enables us to obtain integer-valued neural network outputs while backpropagating real-valued gradients.
+Training neural networks for inventory-dynamics control presents a specific challenge. The adjustment of neural network weights during training relies on propagating real-valued gradients, whereas the neural network outputs—representing replenishment orders—must be integers. To address this challenge in optimizing a discrete problem with real-valued gradient descent learning algorithms, we employ a problem-tailored straight-through estimator [@yang2022injecting,@asikis2023multi,@dyer2023]. This approach enables us to obtain integer-valued neural network outputs while backpropagating real-valued gradients.
 
 `idinn` has been developed for researchers and students working at the intersection of optimization, operations research, and machine learning. It has been made available to students in a machine learning course at Frankfurt School to demonstrate the effectiveness of artificial neural networks in solving real-world optimization problems. In a previous publication [@bottcher2023control], a less accessible code base has been used to compute near-optimal solutions of dozens of dual-sourcing instances. 
 
