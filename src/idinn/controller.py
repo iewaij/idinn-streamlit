@@ -492,6 +492,7 @@ class DualSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
         lr_parameters=3e-3,
         seed=None,
         tensorboard_writer=None,
+        progress_update = None
     ):
         """
         Train the neural network.
@@ -567,6 +568,8 @@ class DualSourcingNeuralController(torch.nn.Module, NeuralControllerMixIn):
                     epoch,
                 )
                 tensorboard_writer.flush()
+            if progress_update is not None:
+                progress_update(epoch+1)
 
         self.load_state_dict(best_state)
 
