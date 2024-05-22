@@ -40,8 +40,8 @@ def test_single_controller_simulate(single_sourcing_model: SingleSourcingModel, 
     assert past_inventories[0] == 10
     assert past_orders[0] == 0
 
-def test_single_controller_train(single_sourcing_model: SingleSourcingModel, single_sourcing_controller: SingleSourcingNeuralController):
-    single_sourcing_controller.train(single_sourcing_model, sourcing_periods=5, epochs=1)
+def test_single_controller_fit(single_sourcing_model: SingleSourcingModel, single_sourcing_controller: SingleSourcingNeuralController):
+    single_sourcing_controller.fit(single_sourcing_model, sourcing_periods=5, epochs=1)
 
 def test_single_controller_plot(single_sourcing_model: SingleSourcingModel, single_sourcing_controller: SingleSourcingNeuralController):
     single_sourcing_controller.plot(single_sourcing_model, sourcing_periods=5)
@@ -94,8 +94,8 @@ def test_dual_controller_simulate(dual_sourcing_model: DualSourcingModel, dual_s
     assert past_regular_orders[0] == 0
     assert past_expedited_orders[0] == 0
 
-def test_dual_controller_train(dual_sourcing_model: DualSourcingModel, dual_sourcing_controller: DualSourcingNeuralController):
-    dual_sourcing_controller.train(dual_sourcing_model, sourcing_periods=5, epochs=1)
+def test_dual_controller_fit(dual_sourcing_model: DualSourcingModel, dual_sourcing_controller: DualSourcingNeuralController):
+    dual_sourcing_controller.fit(dual_sourcing_model, sourcing_periods=5, epochs=1)
 
 def test_dual_controller_plot(dual_sourcing_model: DualSourcingModel, dual_sourcing_controller: DualSourcingNeuralController):
     dual_sourcing_controller.plot(dual_sourcing_model, sourcing_periods=5)

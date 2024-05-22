@@ -118,13 +118,13 @@ Unsurprisingly, the performance is poor because we are only using the untrained 
 ```python
 from torch.utils.tensorboard import SummaryWriter
 
-single_controller.train(
+single_controller.fit(
     sourcing_model=single_sourcing_model,
     sourcing_periods=50,
     validation_sourcing_periods=1000,
     epochs=5000,
     seed=1,
-    tensorboard_writer=SummaryWriter(runs/single_sourcing_model)
+    tensorboard_writer=SummaryWriter(runs / single_sourcing_model)
 )
 ```
 
@@ -215,7 +215,7 @@ To improve the initially poor performance, we can train the neural network contr
 ```python
 from torch.utils.tensorboard import SummaryWriter
 
-dual_controller.train(
+dual_controller.fit(
     sourcing_model=dual_sourcing_model,
     sourcing_periods=100,
     validation_sourcing_periods=1000,

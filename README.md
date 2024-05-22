@@ -42,7 +42,7 @@ controller = SingleSourcingNeuralController(
     activation=torch.nn.CELU(alpha=1)
 )
 # Train the neural controller
-controller.train(
+controller.fit(
     sourcing_model=sourcing_model,
     sourcing_periods=50,
     validation_sourcing_periods=1000,
