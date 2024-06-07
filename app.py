@@ -342,12 +342,13 @@ with tab3:
             sourcing_model=st.session_state["dual_sourcing_model"],
             sourcing_periods=sourcing_periods,
             validation_sourcing_periods=validation_sourcing_periods,
+            validation_freq=100,
             epochs=epochs,
             tensorboard_writer=SummaryWriter("runs/dual_sourcing_model"),
             seed=seed,
         )
         st.session_state["trainingnow"] = False
-        st.success("Training Complete!")
+        st.success("Training complete!")
 
     cf1, cf2 = st.columns([1, 4])
     with cf1:
