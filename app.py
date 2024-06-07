@@ -148,7 +148,7 @@ with tab1:
                 )
             c2c1, c2c2 = st.columns(2)
             with c2c1:
-                fig = px.line(y=all_demands).update_layout(
+                fig = px.line(y=all_demands, line_shape="hv").update_layout(
                     xaxis_title="Periods",
                     yaxis_title="Demand",
                     title="Typical Demand Trajectory",
