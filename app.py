@@ -57,9 +57,7 @@ if "demand_controller" not in st.session_state:
 
 st.header("Inventory Dynamics–Informed Neural Networks ")
 st.markdown(
-    "Welcome to Inventory Informed Neural Networks. This application generates policies to order"
-    "from expendited and regular suppliers! From the sidebar to your left, you can select a demand model, "
-    "then your prefered solver and finally see the results after fitting."
+    "Welcome to Inventory Dynamics–Informed Neural Networks! This application generates ordering policies from expedited and regular suppliers. Use the sidebar on the left to select a demand model, choose your preferred solver, and view the results after fitting."
 )
 
 tab1, tab2, tab3, tab4 = st.tabs(
@@ -235,7 +233,7 @@ with tab2:
                 st.session_state["dual_sourcing_model"] = DualSourcingModel(
                     **model_params
                 )
-                st.success("Successfully create model!")
+                st.success("Model created successfully!")
 
 with tab3:
     st.subheader("Controller Definition")
