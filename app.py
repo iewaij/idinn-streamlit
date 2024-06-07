@@ -103,7 +103,7 @@ with tab1:
                             + str(np.floor(low))
                             + ", "
                             + str(np.floor(high))
-                            + "]"
+                            + "]!"
                         )
                         st.session_state["training"] = 0
                         st.session_state["demand_generator"] = UniformDemand(low, high)
@@ -127,9 +127,9 @@ with tab1:
                         try:
                             df = pd.read_csv(uploaded_file)
                             st.success(
-                                "File successfuly uploaded and contains "
+                                "Successfuly uploaded file and contains "
                                 + str(df.shape[0])
-                                + " demand points:"
+                                + " demand points!"
                             )
                             st.session_state["demand_generator"] = CustomDemand(
                                 torch.tensor(df.iloc[:, 0].values)
@@ -233,7 +233,7 @@ with tab2:
                 st.session_state["dual_sourcing_model"] = DualSourcingModel(
                     **model_params
                 )
-                st.success("Model created successfully!")
+                st.success("Successfully created sourcing model!")
 
 with tab3:
     st.subheader("Controller Definition")
