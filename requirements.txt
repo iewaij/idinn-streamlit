@@ -4,4 +4,4 @@ pandas
 plotly
 streamlit
 torchview
-pytorch>=2.0+cpu
+pytorch~=2.0
