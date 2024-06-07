@@ -173,7 +173,7 @@ with tab2:
             )
             batch_size = np.int32(
                 st.number_input(
-                    "Minibatch/sample size for demand trajectories:",
+                    "Minibatch size for demand trajectories:",
                     value=16,
                     min_value=0,
                     format="%i",
@@ -261,9 +261,9 @@ with tab3:
                 )
 
         layer_sizes = st.text_area(
-            label="Layer sizes: A comma seperated list of integers,"
-            " indicating neurons per layer, starting from the first hidden layer (leftmost)",
-            value="64, 32, 16, 8, 4",
+            label="Layer sizes:",
+            value="128, 64, 32, 16, 8, 4",
+            help="A comma seperated list of integers, indicating neurons per layer, starting from the first hidden layer (leftmost)"
         )
         sourcing_periods = st.number_input(
             "Number of training sourcing periods:",
@@ -280,7 +280,7 @@ with tab3:
             step=1,
         )
         epochs = st.number_input(
-            "Number training epochs:", value=10, min_value=1, format="%i", step=1
+            "Number of training epochs:", value=2000, min_value=1, format="%i", step=1
         )
         seed = st.number_input("Seed:", value=1234, min_value=1, format="%i", step=1)
         if layer_sizes is not None and len(layer_sizes) > 0:
