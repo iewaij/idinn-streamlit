@@ -1,7 +1,6 @@
 import inspect
 import os
 import shutil
-import traceback
 
 import numpy as np
 import pandas as pd
@@ -11,30 +10,38 @@ import torch.nn
 from idinn.controller import DualSourcingNeuralController
 from idinn.demand import CustomDemand, UniformDemand
 from idinn.sourcing_model import DualSourcingModel
-from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from torch.utils.tensorboard import SummaryWriter
 from torchview import draw_graph
 
 st.set_page_config(layout="wide")
 
+
 def tflog2pandas(path):
-    runlog_data = pd.DataFrame({"metric": [], "value": [], "step": []})
+    from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
+
     try:
         event_acc = EventAccumulator(path)
         event_acc.Reload()
         tags = event_acc.Tags()["scalars"]
+        data_ = []
         for tag in tags:
             event_list = event_acc.Scalars(tag)
-            values = list(map(lambda x: x.value, event_list))
-            step = list(map(lambda x: x.step, event_list))
-            r = {"metric": [tag] * len(step), "value": values, "step": step}
-            r = pd.DataFrame(r)
-            runlog_data = pd.concat([runlog_data, r])
+            values = [x.value for x in event_list]
+            step = [x.step for x in event_list]
+            data = pd.DataFrame(
+                {
+                    "metric": [tag.replace("Avg. cost per period/", "")] * len(step),
+                    "value": values,
+                    "step": step,
+                }
+            )
+            data_.append(data)
+        data = pd.concat(data_)
+        data = data.loc[data["step"] >= 100]
     # Dirty catch of DataLossError
     except Exception:
         print("Event file possibly corrupt: {}".format(path))
-        traceback.print_exc()
-    return runlog_data
+    return data
 
 
 if "training" not in st.session_state:
@@ -126,7 +133,6 @@ with tab1:
                                 + str(df.shape[0])
                                 + " demand points:"
                             )
-                            # st.table(df)
                             st.session_state["demand_generator"] = CustomDemand(
                                 torch.tensor(df.iloc[:, 0].values)
                             )
@@ -237,6 +243,7 @@ with tab3:
     with c1:
         activation_map = {
             "ReLU": torch.nn.ReLU,
+            "LeakyReLU": torch.nn.LeakyReLU,
             "ELU": torch.nn.ELU,
             "CELU": torch.nn.CELU,
             "Tanh": torch.nn.Tanh,
@@ -246,7 +253,7 @@ with tab3:
             "TahnShrink": torch.nn.Tanhshrink,
         }
         activation_id = st.selectbox(
-            "Please select activation for hidden layers:",
+            "Activation function of hidden layers:",
             options=list(activation_map.keys()),
         )
         activation_signature = inspect.signature(activation_map[activation_id])
@@ -257,13 +264,14 @@ with tab3:
                 if v.default is not None:
                     default = v.default
                 kwargs[v.name] = st.number_input(
-                    "Please choose a value for the parameter: " + v.name, value=default
+                    "Value for activation function's parameter: " + v.name,
+                    value=default,
                 )
 
         layer_sizes = st.text_area(
             label="Layer sizes:",
             value="128, 64, 32, 16, 8, 4",
-            help="A comma seperated list of integers, indicating neurons per layer, starting from the first hidden layer (leftmost)"
+            help="A comma seperated list of integers, indicating neurons per layer, starting from the first hidden layer (leftmost)",
         )
         sourcing_periods = st.number_input(
             "Number of training sourcing periods:",
@@ -274,7 +282,7 @@ with tab3:
         )
         validation_sourcing_periods = st.number_input(
             "Number of validation sourcing periods:",
-            value=50,
+            value=1000,
             min_value=1,
             format="%i",
             step=1,
@@ -338,7 +346,7 @@ with tab3:
             validation_sourcing_periods=validation_sourcing_periods,
             epochs=epochs,
             tensorboard_writer=SummaryWriter("runs/dual_sourcing_model"),
-            seed=seed
+            seed=seed,
         )
         st.session_state["trainingnow"] = False
         st.success("Training Complete!")
@@ -363,20 +371,18 @@ with tab4:
             try:
                 t4c1, t4c2 = st.columns(2)
                 with t4c1:
-                    tsb_df = tflog2pandas("runs/dual_sourcing_model").pivot(
-                        index="step", columns="metric", values="value"
+                    tsb_df = tflog2pandas("runs/dual_sourcing_model")
+                    fig = px.line(
+                        tsb_df,
+                        x="step",
+                        y="value",
+                        color="metric",
+                        line_shape="hv",
+                        title="Learning Curves",
+                    ).update_layout(
+                        yaxis_title="Avg. Cost per Period", xaxis_title="Epoch"
                     )
-                    tsb_df.columns = list(
-                        map(
-                            lambda x: x.replace("Avg. cost per period/", ""),
-                            tsb_df.columns,
-                        )
-                    )
-                    st.plotly_chart(
-                        px.line(tsb_df, title="Learning Curves").update_layout(
-                            yaxis_title="Avg. Cost per Period", xaxis_title="Epoch"
-                        )
-                    )
+                    st.plotly_chart(fig)
                 with t4c2:
                     (
                         past_inventories,
@@ -393,7 +399,7 @@ with tab4:
                             "Expedited Orders": past_expedited_orders,
                         },
                     )
-                    fig = px.line(df_past).update_layout(
+                    fig = px.line(df_past, line_shape="hv").update_layout(
                         xaxis_title="Periods",
                         yaxis_title="# Units",
                         title="Sample Optimization Trajectory",
