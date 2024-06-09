@@ -240,10 +240,10 @@ with tab3:
     c1, c2 = st.columns(2)
     with c1:
         activation_map = {
+            "CELU": torch.nn.CELU,
             "ReLU": torch.nn.ReLU,
             "LeakyReLU": torch.nn.LeakyReLU,
             "ELU": torch.nn.ELU,
-            "CELU": torch.nn.CELU,
             "Tanh": torch.nn.Tanh,
             "Sigmoid": torch.nn.Sigmoid,
             "SiLU": torch.nn.SiLU,
@@ -342,7 +342,6 @@ with tab3:
             sourcing_model=st.session_state["dual_sourcing_model"],
             sourcing_periods=sourcing_periods,
             validation_sourcing_periods=validation_sourcing_periods,
-            validation_freq=100,
             epochs=epochs,
             tensorboard_writer=SummaryWriter("runs/dual_sourcing_model"),
             seed=seed,
@@ -400,7 +399,7 @@ with tab4:
                     )
                     fig = px.line(df_past, line_shape="hv").update_layout(
                         xaxis_title="Periods",
-                        yaxis_title="# Units",
+                        yaxis_title="Quantity",
                         title="Sample Optimization Trajectory",
                     )
                     st.plotly_chart(fig)
