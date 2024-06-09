@@ -312,7 +312,7 @@ with tab3:
             and st.session_state["dual_sourcing_model"] is not None
         ):
             st.info(
-                "Graph plot for minibatch size: 4, click top right corner to enlrage!"
+                "Graph plot for minibatch size: 4, click top right corner to enlarge!"
             )
             st.session_state["demand_controller"].init_layers(
                 regular_lead_time=regular_lead_time,
