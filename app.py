@@ -1,74 +1,223 @@
 import inspect
+import logging
 import os
+import queue
 import shutil
+import threading
+import time
+from logging.handlers import QueueHandler
+from typing import Any, Dict, Type
 
 import numpy as np
 import pandas as pd
 import plotly.express as px
 import streamlit as st
-import torch.nn
-from idinn.controller import DualSourcingNeuralController
-from idinn.demand import CustomDemand, UniformDemand
-from idinn.sourcing_model import DualSourcingModel
+import torch
+from streamlit.runtime.scriptrunner_utils.script_run_context import (
+    add_script_run_ctx,
+    get_script_run_ctx,
+)
 from torch.utils.tensorboard import SummaryWriter
 from torchview import draw_graph
+from utils import tflog2pandas
+
+from idinn.demand import CustomDemand, UniformDemand
+from idinn.dual_controller import DualSourcingNeuralController
+from idinn.sourcing_model import DualSourcingModel
+
+if torch.cuda.is_available():
+    torch.set_default_device("cuda")
+    torch.classes.__path__ = [os.path.join(torch.__path__[0], torch.classes.__file__)]
 
 st.set_page_config(layout="wide")
 
+if "log_queue" not in st.session_state:
+    st.session_state["log_queue"] = queue.Queue()
 
-def tflog2pandas(path):
-    from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
+queue_handler = QueueHandler(st.session_state["log_queue"])
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+queue_handler.setFormatter(formatter)
 
-    try:
-        event_acc = EventAccumulator(path)
-        event_acc.Reload()
-        tags = event_acc.Tags()["scalars"]
-        data_ = []
-        for tag in tags:
-            event_list = event_acc.Scalars(tag)
-            values = [x.value for x in event_list]
-            step = [x.step for x in event_list]
-            data = pd.DataFrame(
-                {
-                    "metric": [tag.replace("Avg. cost per period/", "")] * len(step),
-                    "value": values,
-                    "step": step,
-                }
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)
+root_logger.addHandler(queue_handler)
+
+# Color mapping for log levels
+LOG_COLORS = {
+    "DEBUG": "blue",
+    "INFO": "green",
+    "WARNING": "orange",
+    "ERROR": "red",
+    "CRITICAL": "purple",
+}
+
+
+def process_log_queue() -> None:
+    """Check queue for new logs and update session state."""
+    while True:
+        try:
+            log = st.session_state["log_queue"].get_nowait()
+            st.session_state.logs.append(log)
+        except queue.Empty:
+            break
+
+
+def write_logs() -> None:
+    """Render logs with color coding in markdown."""
+    process_log_queue()
+    messages = list(map(lambda log: log.msg, st.session_state.logs[-100:]))
+    prev_log = None
+    for log in messages:  # Show last 100 logs
+        try:
+            parts = log.split(" - ")
+            if len(parts) >= 3:
+                timestamp, level, message = parts[0], parts[1], " - ".join(parts[2:])
+                color = LOG_COLORS.get(level, "gray")
+                if log != prev_log:
+                    st.markdown(f"`{timestamp}` :{color}[**{level}**] {message}")
+                prev_log = log
+        except Exception as e:
+            st.write(f"Error parsing log: {str(e)}")
+            time.sleep(0.1)
+
+
+def update_log_display(log_placeholder: st.delta_generator.DeltaGenerator) -> None:
+    """Update the log display.
+
+    Parameters
+    ----------
+    log_placeholder : st.delta_generator.DeltaGenerator
+        The Streamlit placeholder for logs.
+    """
+    with log_placeholder:
+        while True:
+            write_logs()
+            time.sleep(1)
+
+
+def initialize_session_state() -> None:
+    """Initialize the session state."""
+    for key in [
+        "training",
+        "trainingnow",
+        "demand_generator",
+        "dual_sourcing_model",
+        "demand_controller",
+    ]:
+        if key not in st.session_state:
+            st.session_state[key] = (
+                0 if key == "training" else False if key == "trainingnow" else None
             )
-            data_.append(data)
-        data = pd.concat(data_)
-        data = data.loc[data["step"] >= 100]
-    # Dirty catch of DataLossError
-    except Exception:
-        print("Event file possibly corrupt: {}".format(path))
-    return data
+    if "logs" not in st.session_state:
+        st.session_state["logs"] = []
 
 
-if "training" not in st.session_state:
-    st.session_state["training"] = 0
-if "trainingnow" not in st.session_state:
+def fit_model(
+    controller: DualSourcingNeuralController,
+    sourcing_model: DualSourcingModel,
+    sourcing_periods: int,
+    validation_sourcing_periods: int,
+    epochs: int,
+    seed: int,
+) -> DualSourcingNeuralController:
+    """Fit the model.
+
+    Parameters
+    ----------
+    controller : DualSourcingNeuralController
+        The neural network controller.
+    sourcing_model : DualSourcingModel
+        The dual sourcing model.
+    sourcing_periods : int
+        The number of training sourcing periods.
+    validation_sourcing_periods : int
+        The number of validation sourcing periods.
+    epochs : int
+        The number of training epochs.
+    seed : int
+        The random seed.
+
+    Returns
+    -------
+    DualSourcingNeuralController
+        The fitted controller.
+    """
+    if torch.cuda.is_available():
+        torch.set_default_device("cuda")
+        torch.classes.__path__ = [
+            os.path.join(torch.__path__[0], torch.classes.__file__)
+        ]
+
+    controller.fit(
+        sourcing_model=sourcing_model,
+        sourcing_periods=sourcing_periods,
+        validation_sourcing_periods=validation_sourcing_periods,
+        epochs=epochs,
+        tensorboard_writer=SummaryWriter("runs/dual_sourcing_model"),
+        seed=seed,
+    )
+    return controller
+
+
+def click() -> None:
+    """Callback function for training button click."""
+    st.session_state["training"] += 1
+    if os.path.exists("runs/dual_sourcing_model"):
+        shutil.rmtree("runs/dual_sourcing_model")
+    st.session_state["trainingnow"] = True
+
+    log_placeholder = st.empty()
+
+    # Start the logging thread
+    log_thread = threading.Thread(target=update_log_display, args=(log_placeholder,))
+    add_script_run_ctx(log_thread, get_script_run_ctx())
+    log_thread.start()
+
+    fit_model(
+        st.session_state["demand_controller"],
+        st.session_state["dual_sourcing_model"],
+        sourcing_periods,
+        validation_sourcing_periods,
+        epochs,
+        seed,
+    )
+
     st.session_state["trainingnow"] = False
-if "demand_generator" not in st.session_state:
-    st.session_state["demand_generator"] = None
-if "dual_sourcing_model" not in st.session_state:
-    st.session_state["dual_sourcing_model"] = None
-if "demand_controller" not in st.session_state:
-    st.session_state["demand_controller"] = None
+    st.success("Training complete! Check 'Result' tab.")
 
-st.header("Inventory Dynamics–Informed Neural Networks ")
+    # # Ensure the logging thread finishes
+    # log_thread.join()
+
+
+def training_fragment() -> None:
+    """Render the training button."""
+    cf1, cf2 = st.columns([1, 4])
+    with cf1:
+        pressed = st.button("Fit Controller")
+    with cf2:
+        if pressed:
+            click()
+
+
+# Session State Initialization
+initialize_session_state()
+
+# Page Header
+st.header("Inventory Dynamics–Informed Neural Networks")
 st.markdown(
     "Welcome to Inventory Dynamics–Informed Neural Networks! This application generates ordering policies from expedited and regular suppliers. Use the sidebar on the left to select a demand model, choose your preferred solver, and view the results after fitting."
 )
 
+# Tabs
 tab1, tab2, tab3, tab4 = st.tabs(
     ["Demand Generation", "Dual Sourcing Model", "NN Controller", "Result"]
 )
 
+# Demand Generation Tab
 with tab1:
     c1, c2 = st.columns([1, 3])
 
     with c1:
-        submitted = submitted2 = False
         st.subheader("Demand Generation")
 
         demand_type = st.radio(
@@ -76,74 +225,55 @@ with tab1:
         )
         if demand_type == "Uniform":
             with st.form(key="uniform_demand"):
-                high = (1 << 53) - 1
                 low = st.number_input(
                     "Minimum demand",
                     value=1,
-                    placeholder="Type an integer",
                     step=1,
                     format="%i",
-                    max_value=high,
+                    max_value=(1 << 53) - 1,
                 )
                 high = st.number_input(
-                    "Maximum demand",
-                    value=4,
-                    placeholder="Type an integer",
-                    step=1,
-                    format="%i",
-                    min_value=0,
+                    "Maximum demand", value=4, step=1, format="%i", min_value=0
                 )
-                cg1, cg2 = st.columns([1, 2])
-                with cg1:
-                    submitted = st.form_submit_button("Generate")
-                with cg2:
-                    if submitted and high >= low:
-                        st.success(
-                            "Successfully generated uniform demand within range: ["
-                            + str(np.floor(low))
-                            + ", "
-                            + str(np.floor(high))
-                            + "]!"
-                        )
-                        st.session_state["training"] = 0
-                        st.session_state["demand_generator"] = UniformDemand(low, high)
-                    elif submitted:
-                        st.error(
-                            "Please resubmit and make sure that maximum demand is greater or equal to minimum demand."
-                        )
-                        st.session_state["training"] = 0
+                submitted = st.form_submit_button("Generate")
+
+                if submitted and high >= low:
+                    st.success(
+                        f"Successfully generated uniform demand within range: [{np.floor(low)}, {np.floor(high)}]!"
+                    )
+                    st.session_state["training"] = 0
+                    st.session_state["demand_generator"] = UniformDemand(low, high)
+                elif submitted:
+                    st.error(
+                        "Please resubmit and make sure that maximum demand is greater or equal to minimum demand."
+                    )
+                    st.session_state["training"] = 0
 
         elif demand_type == "File":
             with st.form(key="uniform_demand"):
                 uploaded_file = st.file_uploader(
-                    label="Please upload a single column file with demand values. Each row represents a timestep and each"
-                    "element represents a demand value."
+                    label="Please upload a single column file with demand values. Each row represents a timestep and each element represents a demand value."
                 )
-                cgg1, cgg2 = st.columns([1, 2])
-                with cgg1:
-                    submitted2 = st.form_submit_button("Generate")
-                with cgg2:
-                    if submitted2:
-                        try:
-                            df = pd.read_csv(uploaded_file)
-                            st.success(
-                                "Successfuly uploaded file and contains "
-                                + str(df.shape[0])
-                                + " demand points!"
-                            )
-                            st.session_state["demand_generator"] = CustomDemand(
-                                torch.tensor(df.iloc[:, 0].values)
-                            )
-                            st.session_state["training"] = 0
-                        except Exception:
-                            st.error("Could not parse file! Please try again!")
+                submitted2 = st.form_submit_button("Generate")
+                if submitted2:
+                    try:
+                        df = pd.read_csv(uploaded_file)
+                        st.success(
+                            f"Successfully uploaded file and contains {df.shape[0]} demand points!"
+                        )
+                        st.session_state["demand_generator"] = CustomDemand(
+                            torch.tensor(df.iloc[:, 0].values)
+                        )
+                        st.session_state["training"] = 0
+                    except Exception:
+                        st.error("Could not parse file! Please try again!")
+
     with c2:
         if st.session_state["demand_generator"] is not None:
-            all_demands = []
-            for i in range(100):
-                all_demands.append(
-                    st.session_state["demand_generator"].sample(1).item()
-                )
+            all_demands = [
+                st.session_state["demand_generator"].sample(1).item()
+                for _ in range(100)
+            ]
             c2c1, c2c2 = st.columns(2)
             with c2c1:
                 fig = px.line(y=all_demands, line_shape="hv").update_layout(
@@ -160,6 +290,7 @@ with tab1:
                 )
                 st.plotly_chart(fig, use_container_width=True)
 
+# Dual Sourcing Model Tab
 with tab2:
     st.subheader("Dual Sourcing Model")
     with st.form(key="Dual Sourcing Model"):
@@ -212,17 +343,17 @@ with tab2:
                 )
             )
 
-        model_params = dict(
-            regular_lead_time=regular_lead_time,
-            expedited_lead_time=expedited_lead_time,
-            regular_order_cost=regular_order_cost,
-            expedited_order_cost=expedited_order_cost,
-            holding_cost=holding_cost,
-            shortage_cost=shortage_cost,
-            batch_size=batch_size,
-            init_inventory=init_inventory,
-        )
-        model_params["demand_generator"] = st.session_state["demand_generator"]
+        model_params = {
+            "regular_lead_time": regular_lead_time,
+            "expedited_lead_time": expedited_lead_time,
+            "regular_order_cost": regular_order_cost,
+            "expedited_order_cost": expedited_order_cost,
+            "holding_cost": holding_cost,
+            "shortage_cost": shortage_cost,
+            "batch_size": batch_size,
+            "init_inventory": init_inventory,
+            "demand_generator": st.session_state["demand_generator"],
+        }
 
         cc1, cc2 = st.columns([1, 4])
         with cc1:
@@ -235,11 +366,12 @@ with tab2:
                 )
                 st.success("Successfully created sourcing model!")
 
+# Controller Definition Tab
 with tab3:
     st.subheader("Controller Definition")
     c1, c2 = st.columns(2)
     with c1:
-        activation_map = {
+        activation_map: Dict[str, Type[torch.nn.Module]] = {
             "CELU": torch.nn.CELU,
             "ReLU": torch.nn.ReLU,
             "LeakyReLU": torch.nn.LeakyReLU,
@@ -250,117 +382,106 @@ with tab3:
             "GELU": torch.nn.GELU,
             "TahnShrink": torch.nn.Tanhshrink,
         }
-        activation_id = st.selectbox(
-            "Activation function of hidden layers:",
-            options=list(activation_map.keys()),
+        activation_id: str = st.selectbox(
+            "Activation function of hidden layers:", options=list(activation_map.keys())
         )
-        activation_signature = inspect.signature(activation_map[activation_id])
-        kwargs = {}
-        for k, v in activation_signature.parameters.items():
-            if v.annotation == float or v.annotation == int:
-                default = 0.0
-                if v.default is not None:
-                    default = v.default
-                kwargs[v.name] = st.number_input(
-                    "Value for activation function's parameter: " + v.name,
-                    value=default,
-                )
+        activation_signature: inspect.Signature = inspect.signature(
+            activation_map[activation_id]
+        )
+        kwargs: Dict[str, Any] = {
+            v.name: st.number_input(
+                f"Value for activation function's parameter: {v.name}",
+                value=(v.default if v.default is not None else 0.0),
+            )
+            for k, v in activation_signature.parameters.items()
+            if v.annotation in [float, int]
+        }
 
-        layer_sizes = st.text_area(
+        layer_sizes: str = st.text_area(
             label="Layer sizes:",
             value="128, 64, 32, 16, 8, 4",
-            help="A comma seperated list of integers, indicating neurons per layer, starting from the first hidden layer (leftmost)",
+            help="A comma separated list of integers, indicating neurons per layer, starting from the first hidden layer (leftmost)",
         )
-        sourcing_periods = st.number_input(
+        sourcing_periods: int = st.number_input(
             "Number of training sourcing periods:",
             value=50,
             min_value=1,
             format="%i",
             step=1,
         )
-        validation_sourcing_periods = st.number_input(
+        validation_sourcing_periods: int = st.number_input(
             "Number of validation sourcing periods:",
             value=1000,
             min_value=1,
             format="%i",
             step=1,
         )
-        epochs = st.number_input(
+        epochs: int = st.number_input(
             "Number of training epochs:", value=2000, min_value=1, format="%i", step=1
         )
-        seed = st.number_input("Seed:", value=1234, min_value=1, format="%i", step=1)
-        if layer_sizes is not None and len(layer_sizes) > 0:
-            try:
-                layer_sizes = list(map(lambda x: int(x), layer_sizes.split(",")))
-            except Exception:
-                st.error("Provided input cannot be parsed to layers.")
+        seed: int = st.number_input(
+            "Seed:", value=1234, min_value=1, format="%i", step=1
+        )
+        try:
+            layer_sizes = list(map(int, layer_sizes.split(",")))
+        except Exception:
+            st.error("Provided input cannot be parsed to layers.")
+
         st.session_state["demand_controller"] = DualSourcingNeuralController(
             hidden_layers=layer_sizes,
             activation=activation_map[activation_id](**kwargs),
         )
+
     with c2:
         x = torch.linspace(-10, 10, 100)
         fig = px.line(
             x=x.cpu().numpy(),
             y=activation_map[activation_id](**kwargs)(x).cpu().numpy(),
-            title="Activation shape: " + activation_id,
+            title=f"Activation shape: {activation_id}",
         )
         st.plotly_chart(fig, use_container_width=True)
-        # device='meta' -> no memory is consumed for visualization
+
         if (
-            st.session_state["demand_controller"] is not None
-            and st.session_state["dual_sourcing_model"] is not None
+            st.session_state["demand_controller"]
+            and st.session_state["dual_sourcing_model"]
         ):
             st.info(
-                "Graph plot for minibatch size: 4, click top right corner to enlarge!"
+                "Graph plot for minibatch size of 4 (for illustration purposes). Click top right corner to enlarge!"
             )
             st.session_state["demand_controller"].init_layers(
                 regular_lead_time=regular_lead_time,
                 expedited_lead_time=expedited_lead_time,
             )
-            inv_size = torch.Size([4, 1])
-            input_sizes = [inv_size]
-            input_sizes.append(torch.Size([4, max(regular_lead_time, 1)]))
-            input_sizes.append(torch.Size([4, max(regular_lead_time, 1)]))
-            model_graph = draw_graph(
-                st.session_state["demand_controller"], input_size=input_sizes
+            pre_input_tensors = (
+                torch.rand([4, 1]),
+                torch.rand([4, max(regular_lead_time, 1)]),
+                torch.rand([4, max(regular_lead_time, 1)]),
             )
-            g = model_graph.visual_graph
-            g.attr("graph", rankdir="LR")
-            st.graphviz_chart(g)
-        elif st.session_state["dual_sourcing_model"] is None:
+
+            input_tensor = st.session_state["demand_controller"].prepare_inputs(
+                *pre_input_tensors,
+                sourcing_model=st.session_state["dual_sourcing_model"],
+            )
+
+            input_sizes = [input_tensor.shape]
+            model_graph = draw_graph(
+                st.session_state["demand_controller"].model, input_size=input_sizes
+            )
+            model_graph.visual_graph.attr("graph", rankdir="LR")
+            st.graphviz_chart(model_graph.visual_graph)
+        elif not st.session_state["dual_sourcing_model"]:
             st.warning(
                 "Please define a dual sourcing model to generate NN architecture graph!"
             )
 
-    def click():
-        st.session_state["training"] += 1
-        if os.path.exists("runs/dual_sourcing_model"):
-            shutil.rmtree("runs/dual_sourcing_model")
-        st.session_state["trainingnow"] = True
-        st.session_state["demand_controller"].fit(
-            sourcing_model=st.session_state["dual_sourcing_model"],
-            sourcing_periods=sourcing_periods,
-            validation_sourcing_periods=validation_sourcing_periods,
-            epochs=epochs,
-            tensorboard_writer=SummaryWriter("runs/dual_sourcing_model"),
-            seed=seed,
-        )
-        st.session_state["trainingnow"] = False
-        st.success("Training complete!")
+    log_placeholder = st.empty()
+    training_fragment()
 
-    cf1, cf2 = st.columns([1, 4])
-    with cf1:
-        pressed = st.button("Fit Controller")
-    with cf2:
-        if pressed:
-            click()
-
+# Results Tab
 with tab4:
-    if (
-        st.session_state["demand_controller"] is not None
-        and st.session_state["dual_sourcing_model"] is not None
-        and st.session_state["demand_generator"] is not None
+    if all(
+        st.session_state[key]
+        for key in ["demand_controller", "dual_sourcing_model", "demand_generator"]
     ):
         if (
             os.path.exists("runs/dual_sourcing_model")
@@ -370,8 +491,15 @@ with tab4:
                 t4c1, t4c2 = st.columns(2)
                 with t4c1:
                     tsb_df = tflog2pandas("runs/dual_sourcing_model")
+                    # Identify and separate outliers
+                    threshold = (
+                        tsb_df["value"].quantile(0.99) * 10
+                    )  # Define a threshold for outliers
+                    outliers = tsb_df[tsb_df["value"] > threshold]
+                    inliers = tsb_df[tsb_df["value"] <= threshold]
+
                     fig = px.line(
-                        tsb_df,
+                        inliers,
                         x="step",
                         y="value",
                         color="metric",
@@ -380,22 +508,31 @@ with tab4:
                     ).update_layout(
                         yaxis_title="Avg. Cost per Period", xaxis_title="Epoch"
                     )
+
+                    # Add outliers to the plot
+                    if not outliers.empty:
+                        fig.add_scatter(
+                            x=outliers["step"],
+                            y=outliers["value"],
+                            mode="markers",
+                            name="Outliers",
+                            color="metric",
+                        )
+
                     st.plotly_chart(fig)
                 with t4c2:
-                    (
-                        past_inventories,
-                        past_regular_orders,
-                        past_expedited_orders,
-                    ) = st.session_state["demand_controller"].simulate(
-                        sourcing_model=st.session_state["dual_sourcing_model"],
-                        sourcing_periods=sourcing_periods,
+                    past_inventories, past_regular_orders, past_expedited_orders = (
+                        st.session_state["demand_controller"].simulate(
+                            sourcing_model=st.session_state["dual_sourcing_model"],
+                            sourcing_periods=sourcing_periods,
+                        )
                     )
                     df_past = pd.DataFrame(
                         {
                             "Inventory": past_inventories,
                             "Regular Orders": past_regular_orders,
                             "Expedited Orders": past_expedited_orders,
-                        },
+                        }
                     )
                     fig = px.line(df_past, line_shape="hv").update_layout(
                         xaxis_title="Periods",
@@ -403,20 +540,21 @@ with tab4:
                         title="Sample Optimization Trajectory",
                     )
                     st.plotly_chart(fig)
-            except Exception:
+            except Exception as e:
                 st.warning(
                     "No available model, please make sure you submit the previous steps!"
                 )
+                st.error(e)
     else:
-        if st.session_state["demand_generator"] is None:
+        if not st.session_state["demand_generator"]:
             st.warning(
-                "No demand generator is chosen trained for current configuration, please define one."
+                "No demand generator is chosen for the current configuration, please define one."
             )
-        if st.session_state["dual_sourcing_model"] is None:
+        if not st.session_state["dual_sourcing_model"]:
             st.warning(
-                "No sourcing model is for current configuration, please define one."
+                "No sourcing model is defined for the current configuration, please define one."
             )
-        if st.session_state["demand_controller"] is None:
+        if not st.session_state["demand_controller"]:
             st.warning(
-                "No model chosen trained for current configuration, please go to previous step and fit a model."
+                "No model chosen or trained for the current configuration, please go to the previous step and fit a model."
             )
