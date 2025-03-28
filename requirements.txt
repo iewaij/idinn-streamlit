@@ -1,11 +1,11 @@
 idinn==0.2.0a0
-graphviz
+graphviz>=12.2.1
 matplotlib>=3.7.1
 numba>=0.57
 numpy>=2.0
 pandas>=2.0
-plotly
-streamlit
+plotly>=3.0.0
+streamlit>=1.44
 tensorboard>=2.12
 torch>=2.5
 torchview
